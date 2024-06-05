@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun open_connection() {
-        Log.e("PolarPVC2", "Opening connection")
+        Log.i("PolarPVC2", "Opening connection")
 
         binding.deviceTextView.text = getString(R.string.device_id)
         binding.batteryTextView.text = getString(R.string.battery_text) // replace with battery level
@@ -58,26 +58,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun close_connection() {
-        Log.e("PolarPVC2", "Closing connection")
+        Log.i("PolarPVC2", "Closing connection")
         clear_device_text()
 
         if(binding.recordSwitch.isChecked) {
-            Log.e("PolarPVC2", "currently recording")
+            Log.i("PolarPVC2", "currently recording")
             binding.recordSwitch.isChecked=false  // this will call stop_recording()
         }
     }
 
     private fun start_recording() {
-        Log.e("PolarPVC2", "Starting recording")
+        Log.i("PolarPVC2", "Starting recording")
 
         if(!binding.connectSwitch.isChecked) {
-            Log.e("PolarPVC2", "not yet connected")
+            Log.i("PolarPVC2", "not yet connected")
             binding.connectSwitch.isChecked = true   // this will call open_connection()
         }
     }
 
     private fun stop_recording() {
-        Log.e("PolarPVC2", "Stopping recording")
+        Log.i("PolarPVC2", "Stopping recording")
 
     }
 
