@@ -26,31 +26,64 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        clear_device_text()
 
 
-
-        binding.connectSwitch.setOnCheckedChangeListener {
-            buttonView, isChecked ->
-            if(isChecked) {
-                Log.e("PolarPVC2", "Connect checked")
+        binding.connectSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (isChecked) {
+                open_connection()
 
             } else {
-                Log.e("PolarPVC2", "Connect unchecked")
-
+                close_connection()
             }
         }
 
-        binding.recordSwitch.setOnCheckedChangeListener {
-            buttonView, isChecked ->
-            if(isChecked) {
-                Log.e("PolarPVC2", "Record checked")
-
+        binding.recordSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (isChecked) {
+                start_recording()
             } else {
-                Log.e("PolarPVC2", "Record unchecked")
-
+                stop_recording()
             }
         }
 
+    }
+
+
+    private fun open_connection() {
+        Log.e("PolarPVC2", "Opening connection")
+
+        binding.deviceTextView.text = getString(R.string.device_id)
+        binding.batteryTextView.text = getString(R.string.battery_text) // replace with battery level
+
+    }
+
+    private fun close_connection() {
+        Log.e("PolarPVC2", "Closing connection")
+        clear_device_text()
+
+        if(binding.recordSwitch.isChecked) {
+            Log.e("PolarPVC2", "currently recording")
+            binding.recordSwitch.isChecked=false  // this will call stop_recording()
+        }
+    }
+
+    private fun start_recording() {
+        Log.e("PolarPVC2", "Starting recording")
+
+        if(!binding.connectSwitch.isChecked) {
+            Log.e("PolarPVC2", "not yet connected")
+            binding.connectSwitch.isChecked = true   // this will call open_connection()
+        }
+    }
+
+    private fun stop_recording() {
+        Log.e("PolarPVC2", "Stopping recording")
+
+    }
+
+    private fun clear_device_text() {
+        binding.deviceTextView.text = ""
+        binding.batteryTextView.text = ""
     }
 
 }
