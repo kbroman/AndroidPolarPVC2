@@ -15,6 +15,7 @@
         android:layout_marginTop="20dp"
         android:text="@string/connect_text"
         android:textSize="20sp"
+        android:textColor="@color/black"
         app:layout_constraintBaseline_toBaselineOf="@+id/record_switch"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,10 +24,11 @@
         android:id="@+id/record_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
+        android:layout_marginStart="25dp"
         android:layout_marginTop="20dp"
         android:text="@string/record_text"
         android:textSize="20sp"
+        android:textColor="@color/black"
         app:layout_constraintStart_toEndOf="@+id/connect_switch"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -52,5 +54,29 @@
         android:textSize="30sp"
         app:layout_constraintStart_toStartOf="@+id/record_switch"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/device_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/device_id"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/battery_textView"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/battery_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="2sp"
+        android:text="@string/battery_text"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/device_textView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

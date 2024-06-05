@@ -3,4 +3,5 @@
     <string name="device_id">D45EC729</string>
     <string name="connect_text">Connect</string>
     <string name="record_text">Record</string>
+    <string name="battery_text">Battery level 100</string>
 </resources>
