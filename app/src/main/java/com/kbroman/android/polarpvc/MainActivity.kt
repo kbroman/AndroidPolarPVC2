@@ -63,6 +63,9 @@ class MainActivity : AppCompatActivity() {
 
         if(binding.recordSwitch.isChecked) {
             Log.i("PolarPVC2", "currently recording")
+
+            // FIX_ME: should open a dialog box to verify you want to stop recording
+
             binding.recordSwitch.isChecked=false  // this will call stop_recording()
         }
     }
