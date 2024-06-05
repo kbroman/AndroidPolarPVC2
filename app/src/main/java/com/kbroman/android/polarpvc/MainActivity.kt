@@ -1,16 +1,64 @@
 package com.kbroman.android.polarpvc
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+
 import com.kbroman.android.polarpvc.databinding.ActivityMainBinding
+import com.polar.sdk.api.PolarBleApi
+import com.polar.sdk.api.PolarBleApiCallback
+import com.polar.sdk.api.PolarBleApiDefaultImpl
+import com.polar.sdk.api.errors.PolarInvalidArgument
+import com.polar.sdk.api.model.*
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.Disposable
+import java.util.*
+import android.Manifest
+import android.content.pm.PackageManager
+import android.view.View
+import android.widget.Toast
+import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.util.Pair
+import com.google.android.material.snackbar.Snackbar
 
 private lateinit var binding: ActivityMainBinding
+private var ecgDisposable: Disposable? = null
+private var deviceConnected = false
+private var bluetoothEnabled = false
+
 
 class MainActivity : AppCompatActivity() {
+    private var deviceId: String = getString(R.string.device_id)
+    private val TAG: String = getString(R.string.app_name)
+    companion object {
+        private const val PERMISSION_REQUEST_CODE = 1
+    }
+
+    private val api: PolarBleApi by lazy {
+        // Notice all features are enabled
+        PolarBleApiDefaultImpl.defaultImplementation(
+            applicationContext,
+            setOf(
+                PolarBleApi.PolarBleSdkFeature.FEATURE_HR,
+                PolarBleApi.PolarBleSdkFeature.FEATURE_POLAR_SDK_MODE,
+                PolarBleApi.PolarBleSdkFeature.FEATURE_BATTERY_INFO,
+                PolarBleApi.PolarBleSdkFeature.FEATURE_POLAR_ONLINE_STREAMING,
+                PolarBleApi.PolarBleSdkFeature.FEATURE_POLAR_DEVICE_TIME_SETUP,
+                PolarBleApi.PolarBleSdkFeature.FEATURE_DEVICE_INFO,
+            )
+        )
+    }
+
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +75,47 @@ class MainActivity : AppCompatActivity() {
         }
 
         clear_device_text()
+
+
+        api.setPolarFilter(false)
+        api.setApiCallback(object : PolarBleApiCallback() {
+            override fun blePowerStateChanged(powered: Boolean) {
+                Log.i(TAG, "BLE power: $powered")
+                bluetoothEnabled = powered
+                if (powered) {
+                    showToast("Phone Bluetooth on")
+                } else {
+                    showToast("Phone Bluetooth off")
+                }
+            }
+
+            override fun deviceConnected(polarDeviceInfo: PolarDeviceInfo) {
+                Log.i(TAG, "CONNECTED: ${polarDeviceInfo.deviceId}")
+                deviceId = polarDeviceInfo.deviceId
+                deviceConnected = true
+                binding.connectSwitch.isChecked = true
+            }
+
+            override fun deviceConnecting(polarDeviceInfo: PolarDeviceInfo) {
+                Log.i(TAG, "CONNECTING: ${polarDeviceInfo.deviceId}")
+            }
+
+            override fun deviceDisconnected(polarDeviceInfo: PolarDeviceInfo) {
+                Log.i(TAG, "DISCONNECTED: ${polarDeviceInfo.deviceId}")
+                deviceConnected = false
+                binding.connectSwitch.isChecked = false
+            }
+
+            override fun disInformationReceived(identifier: String, uuid: UUID, value: String) {
+                Log.i(TAG, "DIS INFO uuid: $uuid value: $value")
+            }
+
+            override fun batteryLevelReceived(identifier: String, level: Int) {
+                Log.i(TAG, "BATTERY LEVEL: $level")
+                binding.batteryTextView.text = "Battery level $level"
+
+            }
+        })
 
 
         binding.connectSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
@@ -50,11 +139,53 @@ class MainActivity : AppCompatActivity() {
         // Activity life cycle https://developer.android.com/reference/android/app/Activity
         // onCreate, onStart, onResume, onPause, onStop, onDestroy, onRestart
 
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                requestPermissions(arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT), PERMISSION_REQUEST_CODE)
+            } else {
+                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSION_REQUEST_CODE)
+            }
+        } else {
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), PERMISSION_REQUEST_CODE)
+        }
+
+    }
+
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            for (index in 0..grantResults.lastIndex) {
+                if (grantResults[index] == PackageManager.PERMISSION_DENIED) {
+                    Log.w(TAG, "No sufficient permissions")
+                    showToast("No sufficient permissions")
+                    return
+                }
+            }
+            Log.d(TAG, "Needed permissions are granted")
+        }
+    }
+
+    public override fun onPause() {
+        super.onPause()
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        api.foregroundEntered()
+    }
+
+    public override fun onDestroy() {
+        super.onDestroy()
+        api.shutDown()
     }
 
 
     private fun open_connection() {
-        Log.i("PolarPVC2", "Opening connection")
+        Log.i(TAG, "Opening connection")
+
+        api.connectToDevice(deviceId)
 
         binding.deviceTextView.text = getString(R.string.device_id)
         binding.batteryTextView.text = getString(R.string.battery_text) // replace with battery level
@@ -62,30 +193,32 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun close_connection() {
-        Log.i("PolarPVC2", "Closing connection")
-        clear_device_text()
+        Log.i(TAG, "Closing connection")
 
         if(binding.recordSwitch.isChecked) {
-            Log.i("PolarPVC2", "currently recording")
+            Log.i(TAG, "currently recording")
 
             // FIX_ME: should open a dialog box to verify you want to stop recording
             // (maybe always verify stopping recording)
 
             binding.recordSwitch.isChecked=false  // this will call stop_recording()
         }
+
+        api.disconnectFromDevice(deviceId)
+        clear_device_text()
     }
 
     private fun start_recording() {
-        Log.i("PolarPVC2", "Starting recording")
+        Log.i(TAG, "Starting recording")
 
         if(!binding.connectSwitch.isChecked) {
-            Log.i("PolarPVC2", "not yet connected")
+            Log.i(TAG, "not yet connected")
             binding.connectSwitch.isChecked = true   // this will call open_connection()
         }
     }
 
     private fun stop_recording() {
-        Log.i("PolarPVC2", "Stopping recording")
+        Log.i(TAG, "Stopping recording")
 
         // FIX_ME: open dialog box to verify that you want to stop recording?
 
@@ -96,6 +229,9 @@ class MainActivity : AppCompatActivity() {
         binding.batteryTextView.text = ""
     }
 
-
+    private fun showToast(message: String) {
+        val toast = Toast.makeText(applicationContext, message, Toast.LENGTH_LONG)
+        toast.show()
+    }
 
 }
