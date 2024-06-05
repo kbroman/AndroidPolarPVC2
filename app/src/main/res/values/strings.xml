@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">PolarPVC</string>
+    <string name="connect_text">Connect</string>
+    <string name="record_text">Record</string>
+</resources>
