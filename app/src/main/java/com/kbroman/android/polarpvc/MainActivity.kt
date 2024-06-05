@@ -46,6 +46,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
+        // Activity life cycle https://developer.android.com/reference/android/app/Activity
+        // onCreate, onStart, onResume, onPause, onStop, onDestroy, onRestart
+
     }
 
 
@@ -65,6 +69,7 @@ class MainActivity : AppCompatActivity() {
             Log.i("PolarPVC2", "currently recording")
 
             // FIX_ME: should open a dialog box to verify you want to stop recording
+            // (maybe always verify stopping recording)
 
             binding.recordSwitch.isChecked=false  // this will call stop_recording()
         }
@@ -82,11 +87,15 @@ class MainActivity : AppCompatActivity() {
     private fun stop_recording() {
         Log.i("PolarPVC2", "Stopping recording")
 
+        // FIX_ME: open dialog box to verify that you want to stop recording?
+
     }
 
     private fun clear_device_text() {
         binding.deviceTextView.text = ""
         binding.batteryTextView.text = ""
     }
+
+
 
 }
