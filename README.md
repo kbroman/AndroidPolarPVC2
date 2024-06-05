@@ -13,6 +13,8 @@ It uses the [Polar SDK](https://github.com/polarofficial/polar-ble-sdk and
 I learned a great deal from the [KE.Net
 ECG](https://github.com/KennethEvans/KE.Net-ECG) app.
 
+The Device ID is hard-coded in <app/src/main/res/values/strings.xml>.
+
 ---
 
 Licensed under the [MIT license](LICENSE). (See <https://en.wikipedia.org/wiki/MIT_License>.)
