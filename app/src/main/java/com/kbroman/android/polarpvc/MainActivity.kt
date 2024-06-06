@@ -50,10 +50,8 @@ class MainActivity : AppCompatActivity() {
                 PolarBleApi.PolarBleSdkFeature.FEATURE_HR,
                 PolarBleApi.PolarBleSdkFeature.FEATURE_POLAR_SDK_MODE,
                 PolarBleApi.PolarBleSdkFeature.FEATURE_BATTERY_INFO,
-                PolarBleApi.PolarBleSdkFeature.FEATURE_POLAR_ONLINE_STREAMING,
                 PolarBleApi.PolarBleSdkFeature.FEATURE_POLAR_DEVICE_TIME_SETUP,
-                PolarBleApi.PolarBleSdkFeature.FEATURE_DEVICE_INFO,
-            )
+                PolarBleApi.PolarBleSdkFeature.FEATURE_DEVICE_INFO)
         )
     }
 
@@ -92,6 +90,7 @@ class MainActivity : AppCompatActivity() {
                 deviceConnected = true
                 binding.connectSwitch.isChecked = true
                 binding.deviceTextView.text = deviceId
+
             }
 
             override fun deviceConnecting(polarDeviceInfo: PolarDeviceInfo) {
@@ -114,6 +113,33 @@ class MainActivity : AppCompatActivity() {
                 Log.i(TAG, "BATTERY LEVEL: $level")
                 binding.batteryTextView.text = "Battery level $level"
 
+                // start streaming ecg data
+                val isDisposed = ecgDisposable?.isDisposed ?: true
+                if (isDisposed) {
+                    ecgDisposable =
+                        api.requestStreamSettings(deviceId, PolarBleApi.PolarDeviceDataType.ECG)
+                            .toFlowable()
+                            .flatMap { settings: PolarSensorSetting ->
+                                api.startEcgStreaming(deviceId, settings.maxSettings())
+                            }
+                            .subscribe(
+                                { polarEcgData: PolarEcgData ->
+                                    for (data in polarEcgData.samples) {
+                                    Log.i(
+                                            TAG,
+                                            "    yV: ${data.voltage} timeStamp: ${data.timeStamp}"
+                                        )
+                                    }
+                                },
+                                { error: Throwable ->
+                                    Log.e(TAG, "ECG stream failed. Reason $error")
+                                    showToast("ECG stream failed")
+
+                                },
+                                { Log.d(TAG, "ECG stream complete") }
+                            )
+                }
+
             }
         })
 
@@ -127,6 +153,8 @@ class MainActivity : AppCompatActivity() {
 
                 api.connectToDevice(deviceId)
 
+
+
             } else { // close connection
                 Log.i(TAG, "Closing connection")
 
@@ -138,6 +166,8 @@ class MainActivity : AppCompatActivity() {
 
                     binding.recordSwitch.isChecked=false  // this will call stop_recording()
                 }
+
+                ecgDisposable?.dispose()
 
                 api.disconnectFromDevice(deviceId)
                 binding.deviceTextView.text = ""
@@ -191,6 +221,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Needed permissions are granted")
         }
     }
+
 
     public override fun onPause() {
         super.onPause()
