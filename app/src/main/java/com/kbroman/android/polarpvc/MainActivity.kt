@@ -38,10 +38,27 @@ private var bluetoothEnabled = false
 class MainActivity : AppCompatActivity() {
     private var deviceId: String = getString(R.string.device_id)
     private val TAG: String = getString(R.string.app_name)
-
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1
     }
+
+    private val api: PolarBleApi by lazy {
+        // Notice all features are enabled
+        PolarBleApiDefaultImpl.defaultImplementation(
+            applicationContext,
+            setOf(
+                PolarBleApi.PolarBleSdkFeature.FEATURE_HR,
+                PolarBleApi.PolarBleSdkFeature.FEATURE_POLAR_SDK_MODE,
+                PolarBleApi.PolarBleSdkFeature.FEATURE_BATTERY_INFO,
+                PolarBleApi.PolarBleSdkFeature.FEATURE_POLAR_ONLINE_STREAMING,
+                PolarBleApi.PolarBleSdkFeature.FEATURE_POLAR_DEVICE_TIME_SETUP,
+                PolarBleApi.PolarBleSdkFeature.FEATURE_DEVICE_INFO,
+            )
+        )
+    }
+
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,46 +76,62 @@ class MainActivity : AppCompatActivity() {
 
         clear_device_text()
 
-        binding.connectSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (isChecked) { // start connection
-                Log.i(TAG, "Opening connection")
 
-                //    api.connectToDevice(deviceId)
-
-                binding.deviceTextView.text = getString(R.string.device_id)
-                binding.batteryTextView.text =
-                    getString(R.string.battery_text) // replace with battery level
-
-            } else { // close connection
-
-                Log.i(TAG, "Closing connection")
-
-                if (binding.recordSwitch.isChecked) {
-                    Log.i(TAG, "currently recording")
-
-                    // FIX_ME: should open a dialog box to verify you want to stop recording
-                    // (maybe always verify stopping recording)
-
-                    binding.recordSwitch.isChecked = false  // this will call stop_recording()
+        api.setPolarFilter(false)
+        api.setApiCallback(object : PolarBleApiCallback() {
+            override fun blePowerStateChanged(powered: Boolean) {
+                Log.i(TAG, "BLE power: $powered")
+                bluetoothEnabled = powered
+                if (powered) {
+                    showToast("Phone Bluetooth on")
+                } else {
+                    showToast("Phone Bluetooth off")
                 }
+            }
 
-                //    api.disconnectFromDevice(deviceId)
-                clear_device_text()
+            override fun deviceConnected(polarDeviceInfo: PolarDeviceInfo) {
+                Log.i(TAG, "CONNECTED: ${polarDeviceInfo.deviceId}")
+                deviceId = polarDeviceInfo.deviceId
+                deviceConnected = true
+                binding.connectSwitch.isChecked = true
+            }
+
+            override fun deviceConnecting(polarDeviceInfo: PolarDeviceInfo) {
+                Log.i(TAG, "CONNECTING: ${polarDeviceInfo.deviceId}")
+            }
+
+            override fun deviceDisconnected(polarDeviceInfo: PolarDeviceInfo) {
+                Log.i(TAG, "DISCONNECTED: ${polarDeviceInfo.deviceId}")
+                deviceConnected = false
+                binding.connectSwitch.isChecked = false
+            }
+
+            override fun disInformationReceived(identifier: String, uuid: UUID, value: String) {
+                Log.i(TAG, "DIS INFO uuid: $uuid value: $value")
+            }
+
+            override fun batteryLevelReceived(identifier: String, level: Int) {
+                Log.i(TAG, "BATTERY LEVEL: $level")
+                binding.batteryTextView.text = "Battery level $level"
+
+            }
+        })
+
+
+        binding.connectSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (isChecked) {
+                open_connection()
+
+            } else {
+                close_connection()
             }
         }
 
         binding.recordSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (isChecked) { // start recording
-                Log.i(TAG, "Starting recording")
-
-                if (!binding.connectSwitch.isChecked) {
-                    Log.i(TAG, "not yet connected")
-                    binding.connectSwitch.isChecked = true   // this will call open_connection()
-                }
-            } else { // stop recording
-                Log.i(TAG, "Stopping recording")
-
-                // FIX_ME: open dialog box to verify that you want to stop recording?            }
+            if (isChecked) {
+                start_recording()
+            } else {
+                stop_recording()
             }
         }
 
@@ -106,9 +139,33 @@ class MainActivity : AppCompatActivity() {
         // Activity life cycle https://developer.android.com/reference/android/app/Activity
         // onCreate, onStart, onResume, onPause, onStop, onDestroy, onRestart
 
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                requestPermissions(arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT), PERMISSION_REQUEST_CODE)
+            } else {
+                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSION_REQUEST_CODE)
+            }
+        } else {
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), PERMISSION_REQUEST_CODE)
+        }
+
     }
 
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            for (index in 0..grantResults.lastIndex) {
+                if (grantResults[index] == PackageManager.PERMISSION_DENIED) {
+                    Log.w(TAG, "No sufficient permissions")
+                    showToast("No sufficient permissions")
+                    return
+                }
+            }
+            Log.d(TAG, "Needed permissions are granted")
+        }
+    }
 
     public override fun onPause() {
         super.onPause()
@@ -116,14 +173,56 @@ class MainActivity : AppCompatActivity() {
 
     public override fun onResume() {
         super.onResume()
-        //   api.foregroundEntered()
+        api.foregroundEntered()
     }
 
     public override fun onDestroy() {
         super.onDestroy()
-        //   api.shutDown()
+        api.shutDown()
     }
 
+
+    private fun open_connection() {
+        Log.i(TAG, "Opening connection")
+
+        api.connectToDevice(deviceId)
+
+        binding.deviceTextView.text = getString(R.string.device_id)
+        binding.batteryTextView.text = getString(R.string.battery_text) // replace with battery level
+
+    }
+
+    private fun close_connection() {
+        Log.i(TAG, "Closing connection")
+
+        if(binding.recordSwitch.isChecked) {
+            Log.i(TAG, "currently recording")
+
+            // FIX_ME: should open a dialog box to verify you want to stop recording
+            // (maybe always verify stopping recording)
+
+            binding.recordSwitch.isChecked=false  // this will call stop_recording()
+        }
+
+        api.disconnectFromDevice(deviceId)
+        clear_device_text()
+    }
+
+    private fun start_recording() {
+        Log.i(TAG, "Starting recording")
+
+        if(!binding.connectSwitch.isChecked) {
+            Log.i(TAG, "not yet connected")
+            binding.connectSwitch.isChecked = true   // this will call open_connection()
+        }
+    }
+
+    private fun stop_recording() {
+        Log.i(TAG, "Stopping recording")
+
+        // FIX_ME: open dialog box to verify that you want to stop recording?
+
+    }
 
     private fun clear_device_text() {
         binding.deviceTextView.text = ""
