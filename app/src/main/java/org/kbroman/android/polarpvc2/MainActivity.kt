@@ -56,8 +56,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-
-
+    public val pd: PeakDetection = PeakDetection()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -254,12 +253,8 @@ class MainActivity : AppCompatActivity() {
                 .subscribe(
                     { polarEcgData: PolarEcgData ->
                         Log.i(TAG, "ecg update")
-                        for (data in polarEcgData.samples) {
-                            var voltage : Double = (data.voltage.toFloat() / 1000.0)
-                            var timestamp = data.timeStamp + 946684800000000000
-                            // for time offset, see https://github.com/polarofficial/polar-ble-sdk/blob/master/documentation/TimeSystemExplained.md
-                            Log.i(TAG, "time = ${timestamp}   volt = ${voltage}")
-                        }
+
+                        pd.processData(polarEcgData)
                     },
                     { error: Throwable ->
                         Log.e(TAG, "Ecg stream failed $error")
