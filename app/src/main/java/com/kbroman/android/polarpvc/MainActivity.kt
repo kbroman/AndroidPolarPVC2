@@ -74,9 +74,6 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        clear_device_text()
-
-
         api.setPolarFilter(false)
         api.setApiCallback(object : PolarBleApiCallback() {
             override fun blePowerStateChanged(powered: Boolean) {
@@ -94,6 +91,7 @@ class MainActivity : AppCompatActivity() {
                 deviceId = polarDeviceInfo.deviceId
                 deviceConnected = true
                 binding.connectSwitch.isChecked = true
+                binding.deviceTextView.text = deviceId
             }
 
             override fun deviceConnecting(polarDeviceInfo: PolarDeviceInfo) {
@@ -104,6 +102,8 @@ class MainActivity : AppCompatActivity() {
                 Log.i(TAG, "DISCONNECTED: ${polarDeviceInfo.deviceId}")
                 deviceConnected = false
                 binding.connectSwitch.isChecked = false
+                binding.deviceTextView.text = ""
+                binding.batteryTextView.text = ""
             }
 
             override fun disInformationReceived(identifier: String, uuid: UUID, value: String) {
@@ -119,19 +119,44 @@ class MainActivity : AppCompatActivity() {
 
 
         binding.connectSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (isChecked) {
-                open_connection()
+            if (isChecked) { // open connection
+                Log.i(TAG, "Opening connection")
 
-            } else {
-                close_connection()
+                binding.deviceTextView.text = "Connecting..."
+                binding.batteryTextView.text = "Battery level..."
+
+                api.connectToDevice(deviceId)
+
+            } else { // close connection
+                Log.i(TAG, "Closing connection")
+
+                if(binding.recordSwitch.isChecked) {
+                    Log.i(TAG, "currently recording")
+
+                    // FIX_ME: should open a dialog box to verify you want to stop recording
+                    // (maybe always verify stopping recording)
+
+                    binding.recordSwitch.isChecked=false  // this will call stop_recording()
+                }
+
+                api.disconnectFromDevice(deviceId)
+                binding.deviceTextView.text = ""
+                binding.batteryTextView.text = ""
             }
         }
 
         binding.recordSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (isChecked) {
-                start_recording()
-            } else {
-                stop_recording()
+            if (isChecked) { // start recording
+                Log.i(TAG, "Starting recording")
+
+                if(!binding.connectSwitch.isChecked) {
+                    Log.i(TAG, "not yet connected")
+                    binding.connectSwitch.isChecked = true   // this will call open_connection()
+                }
+            } else { // stop recording
+                Log.i(TAG, "Stopping recording")
+
+                // FIX_ME: open dialog box to verify that you want to stop recording?
             }
         }
 
@@ -179,54 +204,6 @@ class MainActivity : AppCompatActivity() {
     public override fun onDestroy() {
         super.onDestroy()
         api.shutDown()
-    }
-
-
-    private fun open_connection() {
-        Log.i(TAG, "Opening connection")
-
-        api.connectToDevice(deviceId)
-
-        binding.deviceTextView.text = getString(R.string.device_id)
-        binding.batteryTextView.text = getString(R.string.battery_text) // replace with battery level
-
-    }
-
-    private fun close_connection() {
-        Log.i(TAG, "Closing connection")
-
-        if(binding.recordSwitch.isChecked) {
-            Log.i(TAG, "currently recording")
-
-            // FIX_ME: should open a dialog box to verify you want to stop recording
-            // (maybe always verify stopping recording)
-
-            binding.recordSwitch.isChecked=false  // this will call stop_recording()
-        }
-
-        api.disconnectFromDevice(deviceId)
-        clear_device_text()
-    }
-
-    private fun start_recording() {
-        Log.i(TAG, "Starting recording")
-
-        if(!binding.connectSwitch.isChecked) {
-            Log.i(TAG, "not yet connected")
-            binding.connectSwitch.isChecked = true   // this will call open_connection()
-        }
-    }
-
-    private fun stop_recording() {
-        Log.i(TAG, "Stopping recording")
-
-        // FIX_ME: open dialog box to verify that you want to stop recording?
-
-    }
-
-    private fun clear_device_text() {
-        binding.deviceTextView.text = ""
-        binding.batteryTextView.text = ""
     }
 
     private fun showToast(message: String) {
