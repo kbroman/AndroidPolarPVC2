@@ -21,7 +21,7 @@ class RunningAveSD(private val maxItems: Int)  {
         }
         list.add(value)
         sum += value
-        sum += (value * value)
+        sumsq += (value * value)
     }
 
     fun average(): Double {
