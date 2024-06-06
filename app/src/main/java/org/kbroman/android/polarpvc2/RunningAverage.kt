@@ -1,5 +1,7 @@
 package org.kbroman.android.polarpvc2
 
+import java.util.ArrayList
+
 class RunningAverage(private val maxItems: Int) {
     private val list = ArrayList<Double>()
     var sum: Double = 0.0

@@ -1,5 +1,7 @@
 package org.kbroman.android.polarpvc2
 
+import java.util.ArrayList
+
 class RunningAveSD(private val maxItems: Int)  {
 
     private val list = ArrayList<Double>()
