@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity() {
         })
 
 
-        binding.connectSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+        binding.connectSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) { // open connection
                 Log.i(TAG, "Opening connection")
 
@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding.recordSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+        binding.recordSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) { // start recording
                 Log.i(TAG, "Starting recording")
 
