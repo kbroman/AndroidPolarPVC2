@@ -22,6 +22,7 @@ import java.util.*
 import android.Manifest
 import android.content.pm.PackageManager
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
@@ -41,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "PolarPVC2main"
         private const val PERMISSION_REQUEST_CODE = 1
+        private const val RR_TO_HR_FACTOR: Double = 1.0e9 / 7682304.0 * 60
     }
 
     private val api: PolarBleApi by lazy {
@@ -124,7 +126,6 @@ class MainActivity : AppCompatActivity() {
                         {
                             val timeSetString = "time ${calendar.time} set to device"
                             Log.d(TAG, timeSetString)
-                            showToast(timeSetString)
                         },
                         { error: Throwable -> Log.e(TAG, "set time failed: $error") }
                     )
@@ -254,7 +255,16 @@ class MainActivity : AppCompatActivity() {
                     { polarEcgData: PolarEcgData ->
                         Log.i(TAG, "ecg update")
 
-                        pd.processData(polarEcgData)
+                        pd.processData(polarEcgData)  // PeakDetection -> find_peaks
+
+                        if(pd.rrData.size() > 1) {
+                            val hr_bpm = Math.round(RR_TO_HR_FACTOR / pd.rrData.average())
+                            val pvc_ave = Math.round(pd.pvcData.average() * 100)
+                            Log.i(TAG, "pvc = ${pvc_ave}   hr=${hr_bpm}")
+                            binding.pvcTextView.text = "${pvc_ave}% pvc"
+                            binding.hrTextView.text = "${hr_bpm} bpm"
+
+                        }
                     },
                     { error: Throwable ->
                         Log.e(TAG, "Ecg stream failed $error")
