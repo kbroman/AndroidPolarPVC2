@@ -1,4 +1,4 @@
-package com.kbroman.android.polarpvc
+package org.kbroman.android.polarpvc2
 
 import android.os.Build
 import android.os.Bundle
@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
-import com.kbroman.android.polarpvc.databinding.ActivityMainBinding
+import org.kbroman.android.polarpvc2.databinding.ActivityMainBinding
 import com.polar.sdk.api.PolarBleApi
 import com.polar.sdk.api.PolarBleApiCallback
 import com.polar.sdk.api.PolarBleApiDefaultImpl

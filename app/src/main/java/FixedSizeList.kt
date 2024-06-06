@@ -1,4 +1,4 @@
-package com.kbroman.android.polarpvc
+package org.kbroman.android.polarpvc2
 
 // this is to keep all ECG data with ever-growing indexes, but not blow up memory use
 class FixedSizeList(private val maxItems: Int) {
@@ -23,4 +23,3 @@ class FixedSizeList(private val maxItems: Int) {
 
     fun size(): Int = list.size
 }
-

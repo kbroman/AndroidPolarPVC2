@@ -1,4 +1,4 @@
-package com.kbroman.android.polarpvc
+package org.kbroman.android.polarpvc2
 
 class RunningAveSD(private val maxItems: Int)  {
 

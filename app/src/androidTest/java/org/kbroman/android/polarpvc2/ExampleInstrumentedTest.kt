@@ -1,4 +1,4 @@
-package com.kbroman.android.polarpvc
+package org.kbroman.android.polarpvc2
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.kbroman.android.polarpvc", appContext.packageName)
+        assertEquals("org.kbroman.android.polarpvc2", appContext.packageName)
     }
 }

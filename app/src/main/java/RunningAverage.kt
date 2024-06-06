@@ -1,4 +1,4 @@
-package com.kbroman.android.polarpvc
+package org.kbroman.android.polarpvc2
 
 class RunningAverage(private val maxItems: Int) {
     private val list = ArrayList<Double>()

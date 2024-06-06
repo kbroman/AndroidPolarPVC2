@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.kbroman.android.polarpvc"
+    namespace = "org.kbroman.android.polarpvc2"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.kbroman.android.polarpvc"
+        applicationId = "org.kbroman.android.polarpvc2"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
