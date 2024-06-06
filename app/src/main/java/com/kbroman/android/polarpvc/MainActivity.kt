@@ -36,9 +36,9 @@ private var bluetoothEnabled = false
 
 
 class MainActivity : AppCompatActivity() {
-    private var deviceId: String = getString(R.string.device_id)
-    private val TAG: String = getString(R.string.app_name)
+    private var deviceId: String = "D45EC729"
     companion object {
+        private const val TAG = "PolarPVC2"
         private const val PERMISSION_REQUEST_CODE = 1
     }
 
