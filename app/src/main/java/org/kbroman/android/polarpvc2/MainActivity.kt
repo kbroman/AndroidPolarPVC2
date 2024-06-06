@@ -28,6 +28,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.util.Pair
 import com.google.android.material.snackbar.Snackbar
+import java.time.Instant
 
 private lateinit var binding: ActivityMainBinding
 private var ecgDisposable: Disposable? = null
@@ -48,7 +49,7 @@ class MainActivity : AppCompatActivity() {
             applicationContext,
             setOf(
                 PolarBleApi.PolarBleSdkFeature.FEATURE_HR,
-                PolarBleApi.PolarBleSdkFeature.FEATURE_POLAR_SDK_MODE,
+                PolarBleApi.PolarBleSdkFeature.FEATURE_POLAR_ONLINE_STREAMING,
                 PolarBleApi.PolarBleSdkFeature.FEATURE_BATTERY_INFO,
                 PolarBleApi.PolarBleSdkFeature.FEATURE_POLAR_DEVICE_TIME_SETUP,
                 PolarBleApi.PolarBleSdkFeature.FEATURE_DEVICE_INFO)
@@ -113,34 +114,35 @@ class MainActivity : AppCompatActivity() {
                 Log.i(TAG, "BATTERY LEVEL: $level")
                 binding.batteryTextView.text = "Battery level $level"
 
-                // start streaming ecg data
-                val isDisposed = ecgDisposable?.isDisposed ?: true
-                if (isDisposed) {
-                    ecgDisposable =
-                        api.requestStreamSettings(deviceId, PolarBleApi.PolarDeviceDataType.ECG)
-                            .toFlowable()
-                            .flatMap { settings: PolarSensorSetting ->
-                                api.startEcgStreaming(deviceId, settings.maxSettings())
-                            }
-                            .subscribe(
-                                { polarEcgData: PolarEcgData ->
-                                    for (data in polarEcgData.samples) {
-                                    Log.i(
-                                            TAG,
-                                            "    yV: ${data.voltage} timeStamp: ${data.timeStamp}"
-                                        )
-                                    }
-                                },
-                                { error: Throwable ->
-                                    Log.e(TAG, "ECG stream failed. Reason $error")
-                                    showToast("ECG stream failed")
 
-                                },
-                                { Log.d(TAG, "ECG stream complete") }
-                            )
-                }
-
+                // also set the local time on the device
+                val timeZone = TimeZone.getTimeZone("UTC")  // I'm not sure why I need "UTC" here
+                val calendar = Calendar.getInstance(timeZone)
+                calendar.time = Date()
+                api.setLocalTime(deviceId, calendar)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                        {
+                            val timeSetString = "time ${calendar.time} set to device"
+                            Log.d(TAG, timeSetString)
+                            showToast(timeSetString)
+                        },
+                        { error: Throwable -> Log.e(TAG, "set time failed: $error") }
+                    )
             }
+
+            override fun bleSdkFeatureReady(identifier: String, feature: PolarBleApi.PolarBleSdkFeature) {
+                Log.d(TAG, "feature ready $feature")
+
+                when (feature) {
+                    PolarBleApi.PolarBleSdkFeature.FEATURE_POLAR_ONLINE_STREAMING -> {
+                        streamECG()
+                    }
+
+                    else -> {}
+                }
+            }
+
         })
 
 
@@ -240,6 +242,38 @@ class MainActivity : AppCompatActivity() {
     private fun showToast(message: String) {
         val toast = Toast.makeText(applicationContext, message, Toast.LENGTH_LONG)
         toast.show()
+    }
+
+    fun streamECG() {
+        val isDisposed = ecgDisposable?.isDisposed ?: true
+        if (isDisposed) {
+            ecgDisposable = api.requestStreamSettings(deviceId, PolarBleApi.PolarDeviceDataType.ECG)
+                .toFlowable()
+                .flatMap { sensorSetting: PolarSensorSetting -> api.startEcgStreaming(deviceId, sensorSetting.maxSettings()) }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { polarEcgData: PolarEcgData ->
+                        Log.i(TAG, "ecg update")
+                        for (data in polarEcgData.samples) {
+                            var voltage : Double = (data.voltage.toFloat() / 1000.0)
+                            var timestamp = data.timeStamp + 946684800000000000
+                            // for time offset, see https://github.com/polarofficial/polar-ble-sdk/blob/master/documentation/TimeSystemExplained.md
+                            Log.i(TAG, "time = ${timestamp}   volt = ${voltage}")
+                        }
+                    },
+                    { error: Throwable ->
+                        Log.e(TAG, "Ecg stream failed $error")
+                        ecgDisposable = null
+                    },
+                    {
+                        Log.i(TAG, "Ecg stream complete")
+                    }
+                )
+        } else {
+            // NOTE stops streaming if it is "running"
+            ecgDisposable?.dispose()
+            ecgDisposable = null
+        }
     }
 
 }
