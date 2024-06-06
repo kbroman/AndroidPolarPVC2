@@ -1,9 +1,10 @@
 package org.kbroman.android.polarpvc2
 
 // this is to keep all ECG data with ever-growing indexes, but not blow up memory use
-class FixedSizeList(private val maxItems: Int) {
+// this contains doubles, for the voltages
+class FixedSizeDList(private val maxItems: Int) {
     private val list = ArrayList<Double>()
-    var offset: Int = 0
+    private var offset: Int = 0
 
     init {
         offset = 0
