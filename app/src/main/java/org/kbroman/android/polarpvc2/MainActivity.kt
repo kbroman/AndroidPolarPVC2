@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     public val pd: PeakDetection = PeakDetection()
+    public val wd: WriteData = WriteData()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -247,6 +248,7 @@ class MainActivity : AppCompatActivity() {
                         Log.i(TAG, "ecg update")
 
                         pd.processData(polarEcgData)  // PeakDetection -> find_peaks
+                        if(isRecording) wd.writeData(polarEcgData)
 
                         if(pd.rrData.size() > 1) {
                             val hr_bpm = Math.round(60.0 / pd.rrData.average())
