@@ -1,21 +1,26 @@
 package org.kbroman.android.polarpvc2
 
+import android.app.Activity
+import android.content.Intent
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat.startActivityForResult
 import com.polar.sdk.api.model.PolarEcgData
 import java.io.File
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class WriteData (){
+class WriteData : AppCompatActivity() {
     private var timeFileOpened: Long = -1
     private var fp: File? = null
 
     companion object {
         private const val TAG = "PolarPVC2write"
         private const val HOUR_IN_MILLI = 1000*60*60
+        const val CREATE_FILE_REQUEST_CODE = 101
     }
 
 
@@ -43,10 +48,7 @@ class WriteData (){
 
         Log.i(TAG, "Opening file $fileName")
 
-        fp = File(filePath?.toString() + "/" + fileName, "w")
-
-        // write header
-        fp?.writeText("timestamp,ecg\n")
+        createFile(filePath, fileName)
     }
 
     public fun getFileName(): String
@@ -56,4 +58,34 @@ class WriteData (){
 
         return "${currentTime}.csv"
     }
+
+
+    private fun createFile(pickerInitialUri: Uri?, fileName: String) {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "text/csv"
+            putExtra(Intent.EXTRA_TITLE, fileName)
+
+            // Optionally, specify a URI for the directory that should be opened in
+            // the system file picker before your app creates the document.
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
+        }
+        startActivityForResult(intent, CREATE_FILE_REQUEST_CODE)
+    }
+
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, resultData: Intent?) {
+        if (requestCode == CREATE_FILE_REQUEST_CODE
+            && resultCode == Activity.RESULT_OK) {
+
+            resultData?.data?.also { uri ->
+                fp = File(uri.getPath(), "w")
+
+                // write header
+                fp?.writeText("timestamp,ecg\n")            }
+        }
+    }
+
+
+
 }

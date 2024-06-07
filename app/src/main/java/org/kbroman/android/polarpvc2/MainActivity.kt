@@ -2,14 +2,12 @@ package org.kbroman.android.polarpvc2
 
 import android.Manifest
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.DocumentsContract
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
