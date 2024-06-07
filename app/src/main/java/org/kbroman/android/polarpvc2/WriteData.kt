@@ -9,29 +9,48 @@ import java.time.format.DateTimeFormatter
 
 class WriteData {
     public var fileOpen = false
-    private var timeOpened: Long = -1
+    private var timeFileOpened: Long = -1
     companion object {
         private const val TAG = "PolarPVC2write"
+        private const val HOUR_IN_MILLI = 1000*60*60
     }
 
 
     public fun writeData(polarEcgData: PolarEcgData)
     {
+        val currentTimeStamp: Long = Instant.now().toEpochMilli()
+        val timeSinceOpen = currentTimeStamp - timeFileOpened
+        if(timeFileOpened > 0 && timeSinceOpen > HOUR_IN_MILLI) {
+            // fp.flush()
+            // fp.close()
+            openFile()
+        }
+
+        // if file has been opened > 1 hr, close file
+        // if file closed, create and open a new file
+
+        // write data to the file
+
+    }
+
+    public fun openFile()
+    {
+        val fileName = getFileName()
+        timeFileOpened: Long = Instant.now().toEpochMilli()
+
+        Log.i(TAG, "Opening file $fileName")
+
+    }
+
+    public fun getFileName(): String
+    {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss")
         val currentTime = LocalDateTime.now().format(formatter)
 
-        Log.i(TAG, "Current time: $currentTime")
-
-        val currentTimeStamp: Long = Instant.now().toEpochMilli()
-
-        if(timeOpened < 0) {
-            Log.i(TAG, "Opening file")
-            timeOpened = currentTimeStamp
-        } else {
-            Log.i(TAG, "Elapsed time: ${currentTimeStamp - timeOpened}")
-            timeOpened = currentTimeStamp
-        }
+        return "${currentTime}.csv"
     }
+
+    public fun openFile()
 
     // file handle
     // timeOpened
