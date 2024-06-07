@@ -1,11 +1,15 @@
 package org.kbroman.android.polarpvc2
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.DocumentsContract
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -32,8 +36,7 @@ private lateinit var binding: ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
-    //private var context: Context = this.getApplicationContext()
-    //var filePath: String = context.getExternalFilesDir(null).toString() + "/PolarECGdata"
+    var filePath: Uri? = null
     private var deviceId: String = "D45EC729"
     private var ecgDisposable: Disposable? = null
     private var deviceConnected = false
@@ -43,6 +46,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "PolarPVC2main"
         private const val PERMISSION_REQUEST_CODE = 1
+        private const val DIRECTORY_REQUEST_CODE = 501
         private const val RR_TO_HR_FACTOR: Double = 1.0e9 / 7682304.0 * 60
     }
 
@@ -60,7 +64,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     public val pd: PeakDetection = PeakDetection()
-    //public val wd: WriteData = WriteData(filePath)
+    public val wd: WriteData = WriteData()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -190,9 +194,13 @@ class MainActivity : AppCompatActivity() {
                 isRecording = true
 
                 if(!isExternalStorageWriteable()) {
+                    Log.i(TAG, "External storage is not writable")
                     // can't write to SD card so skip
                     isRecording = false
                     binding.recordSwitch.isChecked = false
+                } else {
+                    Log.i(TAG, "gonna try to pick a directory")
+                    openDirectory()
                 }
             } else { // stop recording
                 Log.i(TAG, "Stopping recording")
@@ -231,6 +239,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, resultData: Intent?) {
+        if (requestCode == DIRECTORY_REQUEST_CODE
+            && resultCode == Activity.RESULT_OK) {
+            // The result data contains a URI for the document or directory that
+            // the user selected.
+
+            resultData?.data?.also { uri ->
+                filePath = uri
+
+                Log.i(TAG, "Chosen dir: $filePath")
+            }
+        }
+    }
+
+
     private fun isExternalStorageWriteable(): Boolean {
         val extStorageState = Environment.getExternalStorageState()
         if (Environment.MEDIA_MOUNTED == extStorageState && Environment.MEDIA_MOUNTED_READ_ONLY != extStorageState) {
@@ -258,6 +282,14 @@ class MainActivity : AppCompatActivity() {
         toast.show()
     }
 
+    fun openDirectory() {
+        // Choose a directory using the system's file picker.
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+
+        }
+
+        startActivityForResult(intent, DIRECTORY_REQUEST_CODE)
+    }
 
 
 
@@ -273,7 +305,7 @@ class MainActivity : AppCompatActivity() {
                         Log.i(TAG, "ecg update")
 
                         pd.processData(polarEcgData)  // PeakDetection -> find_peaks
-                        //if(isRecording) wd.writeData(polarEcgData)
+                        if(isRecording && filePath != null) wd.writeData(filePath, polarEcgData)
 
                         if(pd.rrData.size() > 1) {
                             val hr_bpm = Math.round(60.0 / pd.rrData.average())

@@ -1,5 +1,6 @@
 package org.kbroman.android.polarpvc2
 
+import android.net.Uri
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.polar.sdk.api.model.PolarEcgData
@@ -8,7 +9,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class WriteData (var filePath: String){
+class WriteData (){
     private var timeFileOpened: Long = -1
     private var fp: File? = null
 
@@ -18,12 +19,12 @@ class WriteData (var filePath: String){
     }
 
 
-    public fun writeData(polarEcgData: PolarEcgData)
+    public fun writeData(filePath: Uri?, polarEcgData: PolarEcgData)
     {
         val currentTimeStamp: Long = Instant.now().toEpochMilli()
         val timeSinceOpen = currentTimeStamp - timeFileOpened
         if(timeFileOpened < 0 || timeSinceOpen > HOUR_IN_MILLI) {
-              openFile()
+              openFile(filePath)
         }
 
         // write data to the file
@@ -35,14 +36,14 @@ class WriteData (var filePath: String){
         }
     }
 
-    public fun openFile()
+    public fun openFile(filePath: Uri?)
     {
         val fileName = getFileName()
         timeFileOpened = Instant.now().toEpochMilli()
 
         Log.i(TAG, "Opening file $fileName")
 
-        fp = File(filePath + fileName)
+        fp = File(filePath?.toString() + "/" + fileName, "w")
 
         // write header
         fp?.writeText("timestamp,ecg\n")
