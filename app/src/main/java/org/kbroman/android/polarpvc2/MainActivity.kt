@@ -3,7 +3,6 @@ package org.kbroman.android.polarpvc2
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -31,10 +30,9 @@ import java.util.UUID
 
 
 private lateinit var binding: ActivityMainBinding
-var pathSelected = false
 
 class MainActivity : AppCompatActivity() {
-    var filePath: Uri? = null
+    var filePath: String = ""
 
     private var deviceId: String = "D45EC729"
     private var ecgDisposable: Disposable? = null
@@ -45,7 +43,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "PolarPVC2main"
         private const val PERMISSION_REQUEST_CODE = 1
-        private const val DIRECTORY_REQUEST_CODE = 501
         private const val RR_TO_HR_FACTOR: Double = 1.0e9 / 7682304.0 * 60
     }
 
@@ -62,8 +59,8 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    public val pd: PeakDetection = PeakDetection()
-    public val wd: WriteData = WriteData()
+    val pd: PeakDetection = PeakDetection()
+    val wd: WriteData = WriteData(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -205,6 +202,12 @@ class MainActivity : AppCompatActivity() {
             } else { // stop recording
                 Log.i(TAG, "Stopping recording")
                 isRecording = false
+
+                if(wd?.filePointer != null) {
+                    Log.i(TAG, "Closing file")
+                    wd.filePointer!!.flush()
+                    wd.filePointer!!.close()
+                }
             }
         }
 
@@ -266,16 +269,17 @@ class MainActivity : AppCompatActivity() {
         toast.show()
     }
 
-    private val openDocumentTreeLauncher = registerForActivityResult<Intent, ActivityResult>(
+    // this and the next are for selecting output directory
+    private val openDirectoryLauncher = registerForActivityResult<Intent, ActivityResult>(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
 
          try {
             if (result.resultCode == RESULT_OK) {
                 // Get Uri from Storage Access Framework.
-                filePath = result.data!!.data
+                var uri = result.data!!.data
+                filePath = uri.toString()
                 Log.i(TAG, "got a filePath: $filePath")
-                pathSelected = true
             }
         } catch (ex: Exception) {
             Log.e(TAG, "Error in openDirectory")
@@ -288,7 +292,7 @@ class MainActivity : AppCompatActivity() {
             Intent.FLAG_GRANT_READ_URI_PERMISSION and
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION
         )
-        openDocumentTreeLauncher.launch(intent)
+        openDirectoryLauncher.launch(intent)
     }
 
     fun streamECG() {
@@ -303,7 +307,7 @@ class MainActivity : AppCompatActivity() {
                         Log.i(TAG, "ecg update")
 
                         pd.processData(polarEcgData)  // PeakDetection -> find_peaks
-                        if(isRecording && filePath != null) wd.writeData(filePath, polarEcgData)
+                        if(isRecording && filePath != "") wd.writeData(filePath, polarEcgData)
 
                         if(pd.rrData.size() > 1) {
                             val hr_bpm = Math.round(60.0 / pd.rrData.average())
