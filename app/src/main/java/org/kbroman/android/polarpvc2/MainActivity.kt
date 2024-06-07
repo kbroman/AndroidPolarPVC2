@@ -32,13 +32,12 @@ import java.util.UUID
 private lateinit var binding: ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-    var filePath: String = ""
-
     private var deviceId: String = "D45EC729"
     private var ecgDisposable: Disposable? = null
     private var deviceConnected = false
     private var bluetoothEnabled = false
     private var isRecording = false
+    private var filePath: String? = ""
 
     companion object {
         private const val TAG = "PolarPVC2main"
@@ -189,16 +188,9 @@ class MainActivity : AppCompatActivity() {
                 }
                 isRecording = true
 
-                if(!isExternalStorageWriteable()) {
-                    Log.i(TAG, "External storage is not writable")
-                    // can't write to SD card so skip
-                    isRecording = false
-                    binding.recordSwitch.isChecked = false
-                } else {
-                    Log.i(TAG, "gonna try to pick a directory")
-                    chooseDataDirectory()
-                    Log.i(TAG, "chosen directory: $filePath")
-                }
+                val prefs = getPreferences(MODE_PRIVATE)
+                filePath = prefs.getString("PREF_FILE_PATH", "")
+                if(filePath == "") chooseDataDirectory()
             } else { // stop recording
                 Log.i(TAG, "Stopping recording")
                 isRecording = false
@@ -242,14 +234,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun isExternalStorageWriteable(): Boolean {
-        val extStorageState = Environment.getExternalStorageState()
-        if (Environment.MEDIA_MOUNTED == extStorageState && Environment.MEDIA_MOUNTED_READ_ONLY != extStorageState) {
-            return true
-        }
-        return false
-    }
-
     public override fun onPause() {
         super.onPause()
     }
@@ -278,8 +262,24 @@ class MainActivity : AppCompatActivity() {
             if (result.resultCode == RESULT_OK) {
                 // Get Uri from Storage Access Framework.
                 var uri = result.data!!.data
-                filePath = uri.toString()
-                Log.i(TAG, "got a filePath: $filePath")
+                Log.i(TAG, "got a filePath: $uri")
+
+                // save to preferences
+                val editor = getPreferences(MODE_PRIVATE).edit()
+                if (uri == null) {
+                    editor.putString("PREF_FILE_PATH", null)
+                    editor.apply()
+                }
+                try {
+                    this.getContentResolver().takePersistableUriPermission(
+                        uri!!,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION +
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    editor.putString("PREF_FILE_PATH", uri.toString())
+                    editor.apply()
+                } catch (ex: Exception) {
+                    Log.d(TAG,"Failed to save persistent uri permission")
+                }
             }
         } catch (ex: Exception) {
             Log.e(TAG, "Error in openDirectory")
@@ -307,7 +307,10 @@ class MainActivity : AppCompatActivity() {
                         Log.i(TAG, "ecg update")
 
                         pd.processData(polarEcgData)  // PeakDetection -> find_peaks
-                        if(isRecording && filePath != "") wd.writeData(filePath, polarEcgData)
+                        if(isRecording && filePath != "") {
+                            Log.i(TAG, "writing data")
+                            wd.writeData(filePath!!, polarEcgData)
+                        }
 
                         if(pd.rrData.size() > 1) {
                             val hr_bpm = Math.round(60.0 / pd.rrData.average())
