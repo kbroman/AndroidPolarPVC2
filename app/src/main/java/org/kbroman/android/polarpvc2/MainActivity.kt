@@ -194,12 +194,7 @@ class MainActivity : AppCompatActivity() {
             } else { // stop recording
                 Log.i(TAG, "Stopping recording")
                 isRecording = false
-
-                if(wd?.filePointer != null) {
-                    Log.i(TAG, "Closing file")
-                    wd.filePointer!!.flush()
-                    wd.filePointer!!.close()
-                }
+                wd.closeFile()
             }
         }
 
@@ -246,6 +241,7 @@ class MainActivity : AppCompatActivity() {
     public override fun onDestroy() {
         super.onDestroy()
         api.shutDown()
+        wd.closeFile()
     }
 
     private fun showToast(message: String) {

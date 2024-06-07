@@ -1,6 +1,7 @@
 package org.kbroman.android.polarpvc2
 
 import android.net.Uri
+import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
 import android.util.Log
 import com.polar.sdk.api.model.PolarEcgData
@@ -13,7 +14,8 @@ import java.time.format.DateTimeFormatter
 class WriteData(activity: MainActivity) {
     private var timeFileOpened: Long = -1
     private var mActivity = activity
-    public var filePointer: PrintWriter? = null
+    private var filePointer: ParcelFileDescriptor? = null
+    private var fileWriter: PrintWriter? = null
 
     companion object {
         private const val TAG = "PolarPVC2write"
@@ -27,12 +29,7 @@ class WriteData(activity: MainActivity) {
         val currentTimeStamp: Long = Instant.now().toEpochMilli()
         val timeSinceOpen = currentTimeStamp - timeFileOpened
         if(timeFileOpened < 0 || timeSinceOpen > HOUR_IN_MILLI) {
-            if(filePointer != null) {
-                Log.i(TAG, "Closing file")
-                filePointer!!.flush()
-                filePointer!!.close()
-            }
-
+            closeFile()
             openFile(filePath)
         }
 
@@ -41,7 +38,7 @@ class WriteData(activity: MainActivity) {
             val voltage: Double = (data.voltage.toFloat() / 1000.0)
             val timestamp = data.timeStamp + PeakDetection.TIMESTAMP_OFFSET
 
-            filePointer?.write("${timestamp},${voltage}\n")
+            fileWriter?.write("${timestamp},${voltage}\n")
         }
     }
 
@@ -56,13 +53,13 @@ class WriteData(activity: MainActivity) {
         val docTreeUri = DocumentsContract.buildDocumentUriUsingTree(dirUri, documentId)
         val resolver = mActivity.getContentResolver()
         val docUri = DocumentsContract.createDocument(resolver, docTreeUri, "text/csv", fileName)
-        val pfd = mActivity.getContentResolver().openFileDescriptor(docUri!!, "w")
-        val writer = FileWriter(pfd!!.getFileDescriptor())
-        filePointer = PrintWriter(writer)
+        filePointer = mActivity.getContentResolver().openFileDescriptor(docUri!!, "w")
+        val writer = FileWriter(filePointer!!.getFileDescriptor())
+        fileWriter = PrintWriter(writer)
 
         timeFileOpened = Instant.now().toEpochMilli()
         Log.i(TAG, "opened file $docUri")
-        filePointer?.write("time,ecg\n")
+        fileWriter?.write("time,ecg\n")
     }
 
     private fun getFileName(): String
@@ -73,10 +70,14 @@ class WriteData(activity: MainActivity) {
         return "${currentTime}.csv"
     }
 
-
-
-
-
-
-
+    fun closeFile() {
+        if(fileWriter != null) {
+            Log.i(TAG, "Flushing file")
+            fileWriter!!.flush()
+        }
+        if(filePointer != null) {
+            Log.i(TAG, "Closing file")
+            filePointer!!.close()
+        }
+    }
 }
