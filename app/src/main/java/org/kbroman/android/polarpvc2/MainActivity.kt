@@ -24,13 +24,16 @@ import android.content.pm.PackageManager
 import android.widget.Toast
 
 private lateinit var binding: ActivityMainBinding
-private var ecgDisposable: Disposable? = null
-private var deviceConnected = false
-private var bluetoothEnabled = false
+
 
 
 class MainActivity : AppCompatActivity() {
     private var deviceId: String = "D45EC729"
+    private var ecgDisposable: Disposable? = null
+    private var deviceConnected = false
+    private var bluetoothEnabled = false
+    private var isRecording = false
+
     companion object {
         private const val TAG = "PolarPVC2main"
         private const val PERMISSION_REQUEST_CODE = 1
@@ -177,17 +180,13 @@ class MainActivity : AppCompatActivity() {
                     Log.i(TAG, "not yet connected")
                     binding.connectSwitch.isChecked = true   // this will call open_connection()
                 }
+
+                isRecording = true
             } else { // stop recording
                 Log.i(TAG, "Stopping recording")
-
-                // FIX_ME: open dialog box to verify that you want to stop recording?
+                isRecording = false
             }
         }
-
-
-        // Activity life cycle https://developer.android.com/reference/android/app/Activity
-        // onCreate, onStart, onResume, onPause, onStop, onDestroy, onRestart
-
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
