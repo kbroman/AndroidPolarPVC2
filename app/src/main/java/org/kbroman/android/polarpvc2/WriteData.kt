@@ -5,10 +5,13 @@ import com.polar.sdk.api.model.PolarEcgData
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.io.File
 
 class WriteData {
     public var fileOpen = false
     private var timeFileOpened: Long = -1
+    private var fp: File? = null
+
     companion object {
         private const val TAG = "PolarPVC2write"
         private const val HOUR_IN_MILLI = 1000*60*60
@@ -19,19 +22,16 @@ class WriteData {
     {
         val currentTimeStamp: Long = Instant.now().toEpochMilli()
         val timeSinceOpen = currentTimeStamp - timeFileOpened
-        if(timeFileOpened > 0 && timeSinceOpen > HOUR_IN_MILLI) {
-            // fp.flush()
-            // fp.close()
-            openFile()
+        if(timeFileOpened < 0 || timeSinceOpen > HOUR_IN_MILLI) {
+              openFile()
         }
-
-        // if file has been opened > 1 hr, close file
-        // if file closed, create and open a new file
 
         // write data to the file
         for (data in polarEcgData.samples) {
             val voltage: Double = (data.voltage.toFloat() / 1000.0)
             val timestamp = data.timeStamp + PeakDetection.TIMESTAMP_OFFSET
+
+            fp.appendText("${voltage},${timestamp}\n")
         }
     }
 
@@ -42,8 +42,10 @@ class WriteData {
 
         Log.i(TAG, "Opening file $fileName")
 
-        // also write the header ("timestamp,ecg")
+        fp = File(fileName)
 
+        // also write the header ("timestamp,ecg")
+        fp.writeText("timestamp,ecg\n")
     }
 
     public fun getFileName(): String
@@ -53,16 +55,4 @@ class WriteData {
 
         return "${currentTime}.csv"
     }
-
-    public fun openFile()
-
-    // file handle
-    // timeOpened
-    // currentTime
-    // current date/time -> filename
-    // write data to file
-    // open a file
-    // close file
-
-
 }
