@@ -1,33 +1,39 @@
 package org.kbroman.android.polarpvc2
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-
-import org.kbroman.android.polarpvc2.databinding.ActivityMainBinding
 import com.polar.sdk.api.PolarBleApi
 import com.polar.sdk.api.PolarBleApiCallback
 import com.polar.sdk.api.PolarBleApiDefaultImpl
-import com.polar.sdk.api.errors.PolarInvalidArgument
-import com.polar.sdk.api.model.*
+import com.polar.sdk.api.model.PolarDeviceInfo
+import com.polar.sdk.api.model.PolarEcgData
+import com.polar.sdk.api.model.PolarSensorSetting
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
-import java.util.*
-import android.Manifest
-import android.content.pm.PackageManager
-import android.widget.Toast
+import org.kbroman.android.polarpvc2.databinding.ActivityMainBinding
+import java.util.Calendar
+import java.util.Date
+import java.util.TimeZone
+import java.util.UUID
+
 
 private lateinit var binding: ActivityMainBinding
 
 
 
 class MainActivity : AppCompatActivity() {
+    private var context: Context = this.getApplicationContext()
+    var filePath: String = context.getExternalFilesDir(null).toString() + "/PolarECGdata"
     private var deviceId: String = "D45EC729"
     private var ecgDisposable: Disposable? = null
     private var deviceConnected = false
@@ -54,7 +60,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     public val pd: PeakDetection = PeakDetection()
-    public val wd: WriteData = WriteData()
+    public val wd: WriteData = WriteData(filePath)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -181,8 +187,13 @@ class MainActivity : AppCompatActivity() {
                     Log.i(TAG, "not yet connected")
                     binding.connectSwitch.isChecked = true   // this will call open_connection()
                 }
-
                 isRecording = true
+
+                if(!isExternalStorageWriteable()) {
+                    // can't write to SD card so skip
+                    isRecording = false
+                    binding.recordSwitch.isChecked = false
+                }
             } else { // stop recording
                 Log.i(TAG, "Stopping recording")
                 isRecording = false
@@ -199,6 +210,10 @@ class MainActivity : AppCompatActivity() {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), PERMISSION_REQUEST_CODE)
         }
 
+        // request permissions to write files to SD card
+        requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.MANAGE_EXTERNAL_STORAGE), PERMISSION_REQUEST_CODE)
     }
 
 
@@ -216,6 +231,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun isExternalStorageWriteable(): Boolean {
+        val extStorageState = Environment.getExternalStorageState()
+        if (Environment.MEDIA_MOUNTED == extStorageState && Environment.MEDIA_MOUNTED_READ_ONLY != extStorageState) {
+            return true
+        }
+        return false
+    }
 
     public override fun onPause() {
         super.onPause()

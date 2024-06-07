@@ -1,14 +1,14 @@
 package org.kbroman.android.polarpvc2
 
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import com.polar.sdk.api.model.PolarEcgData
+import java.io.File
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.io.File
 
-class WriteData {
-    public var fileOpen = false
+class WriteData (var filePath: String){
     private var timeFileOpened: Long = -1
     private var fp: File? = null
 
@@ -31,21 +31,21 @@ class WriteData {
             val voltage: Double = (data.voltage.toFloat() / 1000.0)
             val timestamp = data.timeStamp + PeakDetection.TIMESTAMP_OFFSET
 
-            fp.appendText("${voltage},${timestamp}\n")
+            fp?.appendText("${voltage},${timestamp}\n")
         }
     }
 
     public fun openFile()
     {
         val fileName = getFileName()
-        timeFileOpened: Long = Instant.now().toEpochMilli()
+        timeFileOpened = Instant.now().toEpochMilli()
 
         Log.i(TAG, "Opening file $fileName")
 
-        fp = File(fileName)
+        fp = File(filePath + fileName)
 
-        // also write the header ("timestamp,ecg")
-        fp.writeText("timestamp,ecg\n")
+        // write header
+        fp?.writeText("timestamp,ecg\n")
     }
 
     public fun getFileName(): String
