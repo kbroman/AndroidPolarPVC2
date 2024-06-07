@@ -62,7 +62,7 @@ class WriteData(activity: MainActivity) {
 
         timeFileOpened = Instant.now().toEpochMilli()
         Log.i(TAG, "opened file $docUri")
-        filePointer?.write("timestamp,ecg_mV\n")
+        filePointer?.write("time,ecg\n")
     }
 
     private fun getFileName(): String
