@@ -22,7 +22,7 @@ class PeakDetection {
         private const val MIN_PEAK_VALUE: Double = 1.5
         private const val HR_200_INTERVAL: Int = 39  // = (60.0/200.0*130)
         private const val MOVING_AVESD_WINDOW: Int = 500
-        private const val TIMESTAMP_OFFSET: Long = 946684800000000000
+        const val TIMESTAMP_OFFSET: Long = 946684800000000000
         // for time offset, see https://github.com/polarofficial/polar-ble-sdk/blob/master/documentation/TimeSystemExplained.md
     }
 

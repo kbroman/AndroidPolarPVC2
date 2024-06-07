@@ -6,7 +6,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-
 class WriteData {
     public var fileOpen = false
     private var timeFileOpened: Long = -1
@@ -30,7 +29,10 @@ class WriteData {
         // if file closed, create and open a new file
 
         // write data to the file
-
+        for (data in polarEcgData.samples) {
+            val voltage: Double = (data.voltage.toFloat() / 1000.0)
+            val timestamp = data.timeStamp + PeakDetection.TIMESTAMP_OFFSET
+        }
     }
 
     public fun openFile()
@@ -39,6 +41,8 @@ class WriteData {
         timeFileOpened: Long = Instant.now().toEpochMilli()
 
         Log.i(TAG, "Opening file $fileName")
+
+        // also write the header ("timestamp,ecg")
 
     }
 
