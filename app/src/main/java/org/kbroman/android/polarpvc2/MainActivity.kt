@@ -1,7 +1,6 @@
 package org.kbroman.android.polarpvc2
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -11,6 +10,8 @@ import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -30,11 +31,11 @@ import java.util.UUID
 
 
 private lateinit var binding: ActivityMainBinding
-
-
+var pathSelected = false
 
 class MainActivity : AppCompatActivity() {
     var filePath: Uri? = null
+
     private var deviceId: String = "D45EC729"
     private var ecgDisposable: Disposable? = null
     private var deviceConnected = false
@@ -198,7 +199,8 @@ class MainActivity : AppCompatActivity() {
                     binding.recordSwitch.isChecked = false
                 } else {
                     Log.i(TAG, "gonna try to pick a directory")
-                    openDirectory()
+                    chooseDataDirectory()
+                    Log.i(TAG, "chosen directory: $filePath")
                 }
             } else { // stop recording
                 Log.i(TAG, "Stopping recording")
@@ -237,22 +239,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onActivityResult(
-        requestCode: Int, resultCode: Int, resultData: Intent?) {
-        if (requestCode == DIRECTORY_REQUEST_CODE
-            && resultCode == Activity.RESULT_OK) {
-            // The result data contains a URI for the document or directory that
-            // the user selected.
-
-            resultData?.data?.also { uri ->
-                filePath = uri
-
-                Log.i(TAG, "Chosen dir: $filePath")
-            }
-        }
-    }
-
-
     private fun isExternalStorageWriteable(): Boolean {
         val extStorageState = Environment.getExternalStorageState()
         if (Environment.MEDIA_MOUNTED == extStorageState && Environment.MEDIA_MOUNTED_READ_ONLY != extStorageState) {
@@ -280,16 +266,30 @@ class MainActivity : AppCompatActivity() {
         toast.show()
     }
 
-    fun openDirectory() {
-        // Choose a directory using the system's file picker.
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+    private val openDocumentTreeLauncher = registerForActivityResult<Intent, ActivityResult>(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
 
+         try {
+            if (result.resultCode == RESULT_OK) {
+                // Get Uri from Storage Access Framework.
+                filePath = result.data!!.data
+                Log.i(TAG, "got a filePath: $filePath")
+                pathSelected = true
+            }
+        } catch (ex: Exception) {
+            Log.e(TAG, "Error in openDirectory")
         }
-
-        startActivityForResult(intent, DIRECTORY_REQUEST_CODE)
     }
 
-
+    private fun chooseDataDirectory() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        intent.addFlags(
+            Intent.FLAG_GRANT_READ_URI_PERMISSION and
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        )
+        openDocumentTreeLauncher.launch(intent)
+    }
 
     fun streamECG() {
         val isDisposed = ecgDisposable?.isDisposed ?: true

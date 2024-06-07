@@ -15,7 +15,8 @@ import java.time.format.DateTimeFormatter
 
 class WriteData : AppCompatActivity() {
     private var timeFileOpened: Long = -1
-    private var fp: File? = null
+    private var fp: File = File("")
+    private var fileReady = false
 
     companion object {
         private const val TAG = "PolarPVC2write"
@@ -32,6 +33,8 @@ class WriteData : AppCompatActivity() {
               openFile(filePath)
         }
 
+        if(!fileReady) return
+
         // write data to the file
         for (data in polarEcgData.samples) {
             val voltage: Double = (data.voltage.toFloat() / 1000.0)
@@ -47,8 +50,17 @@ class WriteData : AppCompatActivity() {
         timeFileOpened = Instant.now().toEpochMilli()
 
         Log.i(TAG, "Opening file $fileName")
+        Log.i(TAG, "Path selected? $pathSelected")
+        Log.i(TAG, "path=${filePath.toString()} name=$fileName")
 
-        createFile(filePath, fileName)
+        if(pathSelected) {
+            fp = File(filePath.toString(), fileName)
+            Log.i(TAG, "hello")
+            fp.writeText("timestamp,ecg\n")
+            Log.i(TAG, "hello again")
+
+            fileReady = true
+        }
     }
 
     public fun getFileName(): String
@@ -60,31 +72,8 @@ class WriteData : AppCompatActivity() {
     }
 
 
-    private fun createFile(pickerInitialUri: Uri?, fileName: String) {
-        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            type = "text/csv"
-            putExtra(Intent.EXTRA_TITLE, fileName)
 
-            // Optionally, specify a URI for the directory that should be opened in
-            // the system file picker before your app creates the document.
-            putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
-        }
-        startActivityForResult(intent, CREATE_FILE_REQUEST_CODE)
-    }
 
-    override fun onActivityResult(
-        requestCode: Int, resultCode: Int, resultData: Intent?) {
-        if (requestCode == CREATE_FILE_REQUEST_CODE
-            && resultCode == Activity.RESULT_OK) {
-
-            resultData?.data?.also { uri ->
-                fp = File(uri.getPath(), "w")
-
-                // write header
-                fp?.writeText("timestamp,ecg\n")            }
-        }
-    }
 
 
 
