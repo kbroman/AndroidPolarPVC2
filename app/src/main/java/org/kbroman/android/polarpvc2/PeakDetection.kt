@@ -2,13 +2,11 @@ package org.kbroman.android.polarpvc2
 
 import android.util.Log
 import com.polar.sdk.api.model.PolarEcgData
-import java.lang.String
 import kotlin.Double
 import kotlin.Int
 import kotlin.Long
 import kotlin.math.max
 import kotlin.math.min
-import android.widget.TextView
 
 class PeakDetection {
 
@@ -18,27 +16,25 @@ class PeakDetection {
         private const val N_PEAKS = 60*60*2
         private const val N_PEAKS_FOR_RR_AVE = 25
         private const val N_PEAKS_FOR_PVC_AVE = 100
-        private const val FS: Double = 130.169282548569
         private const val PVC_RS_DIST: Double = 5.0
         private const val INITIAL_PEAKS_TO_SKIP = 2
         private const val INITIAL_ECG_TO_SKIP = 500
         private const val MIN_PEAK_VALUE: Double = 1.5
-        private const val HR_200_INTERVAL: Int = 39  // = (60.0/200.0*FS)
+        private const val HR_200_INTERVAL: Int = 39  // = (60.0/200.0*130)
         private const val MOVING_AVESD_WINDOW: Int = 500
         private const val TIMESTAMP_OFFSET: Long = 946684800000000000
         // for time offset, see https://github.com/polarofficial/polar-ble-sdk/blob/master/documentation/TimeSystemExplained.md
     }
 
-    private val mActivity: MainActivity? = null
-    public var ecgData: ECGdata = ECGdata(N_ECG_VALS)
-    private var peakIndexes: FixedSizedList<Int> = FixedSizedList<Int>(N_PEAKS)
-    public var pvcData: RunningAverage = RunningAverage(N_PEAKS_FOR_PVC_AVE)
-    public var rrData: RunningAverage = RunningAverage(N_PEAKS_FOR_RR_AVE)
+    var ecgData: ECGdata = ECGdata(N_ECG_VALS)
+    var pvcData: RunningAverage = RunningAverage(N_PEAKS_FOR_PVC_AVE)
+    var rrData: RunningAverage = RunningAverage(N_PEAKS_FOR_RR_AVE)
+    private var peakIndexes = FixedSizedList<Int>(N_PEAKS)
     private var movingAveSDecg = RunningAveSD(MOVING_AVESD_WINDOW)
-    var last_smsqdiff: Double = -Double.MAX_VALUE
+    private var last_smsqdiff: Double = -Double.MAX_VALUE
     private var smsqdiff = ArrayList<Double>()
-    var lastPeakIndex: Int = -1
-    var thisPeakIndex: Int = -1
+    private var lastPeakIndex: Int = -1
+    private var thisPeakIndex: Int = -1
 
     fun processData(polarEcgData: PolarEcgData) {
         val end: Int
@@ -48,16 +44,14 @@ class PeakDetection {
 
         // grab a batch of data
         for (data in polarEcgData.samples) {
-            var voltage : Double = (data.voltage.toFloat() / 1000.0)
-            var timestamp = data.timeStamp + TIMESTAMP_OFFSET
+            val voltage : Double = (data.voltage.toFloat() / 1000.0)
+            val timestamp = data.timeStamp + TIMESTAMP_OFFSET
 
             ecgData.add(voltage, timestamp)
-            //Log.i(TAG, "${voltage}   ${timestamp}   ${ecgData.volt.get(0)}    ${ecgData.time.get(0)}  ecgData size=${ecgData.size()}  ecgData maxIndex=${ecgData.maxIndex()}")
-
         }
         val n: Int = ecgData.maxIndex() - start
 
-        if (ecgData.maxIndex() < 500) return  // wait to start looking for peaks
+        if (ecgData.maxIndex() < INITIAL_ECG_TO_SKIP) return  // wait to start looking for peaks
 
         // look for peaks in first half
         end = start + n / 2
@@ -69,9 +63,7 @@ class PeakDetection {
         find_peaks(start, ecgData.maxIndex())
     }
 
-
-
-    fun find_peaks(start: Int, end: Int) {
+    private fun find_peaks(start: Int, end: Int) {
         smsqdiff.clear()
         // get squared differences
         for (i in start until end - 1) {
@@ -83,30 +75,25 @@ class PeakDetection {
 
         // smooth in groups of three
         for (i in 0 until smsqdiff.size - 2) {
-            smsqdiff.set(i, (smsqdiff.get(i) + smsqdiff.get(i + 1) + smsqdiff.get(i + 2)) / 3.0)
+            smsqdiff[i] = (smsqdiff[i] + smsqdiff[i + 1] + smsqdiff[i + 2]) / 3.0
 
-            movingAveSDecg.add(smsqdiff.get(i)) // get running mean and SD
+            movingAveSDecg.add(smsqdiff[i]) // get running mean and SD
         }
 
         // find maximum
         val max_index = which_max(smsqdiff)
-        val this_smsqdiff: Double = smsqdiff.get(max_index)
+        val this_smsqdiff: Double = smsqdiff[max_index]
         thisPeakIndex = max_index + start
-
-        val this_ecg: Double = ecgData.volt.get(thisPeakIndex)
 
         var peakFound = false
 
         if ((this_smsqdiff - movingAveSDecg.average()) / movingAveSDecg.sd() >= MIN_PEAK_VALUE) { // peak only if large
-            Log.i(TAG, "large peak")
             if (peakIndexes.size() == 0 || thisPeakIndex - lastPeakIndex >= HR_200_INTERVAL) { // new peak
                 peakFound = true
                 last_smsqdiff = this_smsqdiff
                 lastPeakIndex = thisPeakIndex
                 peakIndexes.add(thisPeakIndex)
-                Log.i(TAG, "new peak found: ${lastPeakIndex}")
             } else { // too close to previous peak
-                Log.i(TAG, "too close to previous peak")
                 if (this_smsqdiff > last_smsqdiff) {
                     last_smsqdiff = this_smsqdiff
                     lastPeakIndex = thisPeakIndex
@@ -145,10 +132,11 @@ class PeakDetection {
 
             val hr_bpm = 60.0 / rrData.average()
 
-            Log.i(TAG, "pvc = ${pvcData.average()} rr = ${rrData.average()} hr = ${hr_bpm}")
+            Log.i(TAG, "pvc = ${pvcData.average()} rr = ${rrData.average()} hr = $hr_bpm")
         }
     }
-    fun which_max(v: ArrayList<Double>): Int {
+
+    private fun which_max(v: ArrayList<Double>): Int {
         if (v.isEmpty()) return (-1)
 
         val n = v.size
@@ -167,7 +155,7 @@ class PeakDetection {
         return (max_index)
     }
 
-    fun which_min(v: ArrayList<Double>): Int {
+    private fun which_min(v: ArrayList<Double>): Int {
         if (v.isEmpty()) return (-1)
 
         val n = v.size

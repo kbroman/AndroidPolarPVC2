@@ -21,15 +21,7 @@ import io.reactivex.rxjava3.disposables.Disposable
 import java.util.*
 import android.Manifest
 import android.content.pm.PackageManager
-import android.view.View
-import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.StringRes
-import androidx.appcompat.app.AlertDialog
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.util.Pair
-import com.google.android.material.snackbar.Snackbar
-import java.time.Instant
 
 private lateinit var binding: ActivityMainBinding
 private var ecgDisposable: Disposable? = null
@@ -280,5 +272,4 @@ class MainActivity : AppCompatActivity() {
             ecgDisposable = null
         }
     }
-
 }

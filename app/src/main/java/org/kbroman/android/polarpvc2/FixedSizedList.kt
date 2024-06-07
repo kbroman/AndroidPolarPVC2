@@ -21,11 +21,11 @@ class FixedSizedList<T>(private val maxItems: Int) {
     }
 
      fun get(index: Int): T {
-        return list.get(index - offset) // gonna be bad if index out of range
+        return list[index - offset] // gonna be bad if index out of range
     }
 
     fun setLast(value: T) {
-        list.set(list.size - 1, value)
+        list[list.size - 1] = value
     }
 
     fun size(): Int = list.size

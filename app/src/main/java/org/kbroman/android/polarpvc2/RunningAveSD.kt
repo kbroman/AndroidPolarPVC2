@@ -1,12 +1,13 @@
 package org.kbroman.android.polarpvc2
 
 import java.util.ArrayList
+import kotlin.math.sqrt
 
 class RunningAveSD(private val maxItems: Int)  {
 
     private val list = ArrayList<Double>()
-    var sum: Double = 0.0
-    var sumsq: Double = 0.0
+    private var sum: Double = 0.0
+    private var sumsq: Double = 0.0
 
     init {
         sum = 0.0
@@ -35,7 +36,7 @@ class RunningAveSD(private val maxItems: Int)  {
         return if (n < 2) {
             0.0
         } else {
-            Math.sqrt((sumsq - (sum * sum) / n) / (n - 1))
+            sqrt((sumsq - (sum * sum) / n) / (n - 1))
         }
     }
 }
