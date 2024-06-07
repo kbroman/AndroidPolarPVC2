@@ -1,5 +1,7 @@
 # PolarPVC2
 
+![PolarPVC2 app icon with red background and an ECG trace in white of three heart beats with middle one being a PVC](app_icon.png)
+
 This is an Android app to get ECG data from a [Polar H10 chest-strap
 heart rate
 sensor](https://www.polar.com/us-en/sensors/h10-heart-rate-sensor) and
