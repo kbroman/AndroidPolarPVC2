@@ -258,7 +258,7 @@ class MainActivity : AppCompatActivity() {
                         pd.processData(polarEcgData)  // PeakDetection -> find_peaks
 
                         if(pd.rrData.size() > 1) {
-                            val hr_bpm = Math.round(RR_TO_HR_FACTOR / pd.rrData.average())
+                            val hr_bpm = Math.round(60.0 / pd.rrData.average())
                             val pvc_ave = Math.round(pd.pvcData.average() * 100)
                             Log.i(TAG, "pvc = ${pvc_ave}   hr=${hr_bpm}")
                             binding.pvcTextView.text = "${pvc_ave}% pvc"

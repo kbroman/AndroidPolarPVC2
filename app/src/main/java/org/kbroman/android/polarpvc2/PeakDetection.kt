@@ -18,7 +18,6 @@ class PeakDetection {
         private const val N_PEAKS = 60*60*2
         private const val N_PEAKS_FOR_RR_AVE = 25
         private const val N_PEAKS_FOR_PVC_AVE = 100
-        private const val RR_TO_HR_FACTOR: Double = 1.0e9 / 7682304.0 * 60
         private const val FS: Double = 130.169282548569
         private const val PVC_RS_DIST: Double = 5.0
         private const val INITIAL_PEAKS_TO_SKIP = 2
@@ -137,13 +136,14 @@ class PeakDetection {
                 Log.i(TAG, "not PVC")
             }
 
-            // get RR distance based on indexes
+            // get RR distance based on timestamps, in seconds
             rrData.add(
-                (peakIndexes.get(peakIndexes.size() - 2) - peakIndexes.get(peakIndexes.size() - 3)*1.0
-                )
+                (ecgData.time.get(peakIndexes.get(peakIndexes.size() - 2)) -
+                        ecgData.time.get(peakIndexes.get(peakIndexes.size() - 3)) )*1e-9
+
             )
 
-            val hr_bpm = RR_TO_HR_FACTOR / rrData.average()
+            val hr_bpm = 60.0 / rrData.average()
 
             Log.i(TAG, "pvc = ${pvcData.average()} rr = ${rrData.average()} hr = ${hr_bpm}")
         }
