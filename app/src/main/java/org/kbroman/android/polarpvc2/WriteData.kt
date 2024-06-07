@@ -67,7 +67,7 @@ class WriteData(activity: MainActivity) {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss")
         val currentTime = LocalDateTime.now().format(formatter)
 
-        return "${currentTime}.csv"
+        return "ecg_${currentTime}.csv"
     }
 
     fun closeFile() {
