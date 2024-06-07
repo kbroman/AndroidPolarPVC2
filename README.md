@@ -13,7 +13,7 @@ It uses the [Polar SDK](https://github.com/polarofficial/polar-ble-sdk) and
 I learned a great deal from the [KE.Net
 ECG](https://github.com/KennethEvans/KE.Net-ECG) app.
 
-The Device ID is hard-coded in [`MainActivity.kt`](https://github.com/kbroman/AndroidPolarPVC2/blob/main/app/src/main/java/org/kbroman/android/polarpvc2/MainActivity.kt#L39).
+The Device ID is hard-coded in [`MainActivity.kt`](https://github.com/kbroman/AndroidPolarPVC2/blob/main/app/src/main/java/org/kbroman/android/polarpvc2/MainActivity.kt#L33).
 
 ---
 
