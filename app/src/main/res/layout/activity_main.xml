@@ -25,40 +25,39 @@
         />
 
        <com.androidplot.xy.XYPlot
-        style="@style/APDefacto"
-        android:id="@+id/ecgplot"
-        android:layout_width="fill_parent"
-           android:layout_height="0dp"
-           android:layout_weight="1"
-        ap:title="ECG values"
-        ap:rangeTitle="range"
-        ap:domainTitle="domain"
-        ap:lineLabels="left|bottom"
-        ap:lineLabelRotationBottom="-45"/>
+           style="@style/FullScreenGraph"
+            android:id="@+id/ecgplot"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+           app:graphBackgroundColor="@color/grayA"
+           app:graphMarginBottom="10dp"
+           app:graphMarginLeft="10dp"
+           app:graphMarginRight="10dp"
+           app:graphMarginTop="10dp"
+           app:gridBackgroundColor="@color/grayA"/>
 
         <com.androidplot.xy.XYPlot
-            style="@style/APDefacto"
+            style="@style/FullScreenGraph"
+            app:graphBackgroundColor="@color/grayA"
+            app:graphMarginBottom="20dp"
+            app:graphMarginLeft="30dp"
             android:id="@+id/pvcplot"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            ap:title="PVC burden"
-            ap:rangeTitle="range"
-            ap:domainTitle="domain"
-            ap:lineLabels="left|bottom"
-            ap:lineLabelRotationBottom="-45"/>
+            ap:rangeTitle="% PVC"/>
 
         <com.androidplot.xy.XYPlot
-            style="@style/APDefacto"
+            style="@style/FullScreenGraph"
+            app:graphBackgroundColor="@color/grayA"
+            app:graphMarginBottom="20dp"
+            app:graphMarginLeft="30dp"
             android:id="@+id/hrplot"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            ap:title="Heart Rate"
-            ap:rangeTitle="range"
-            ap:domainTitle="domain"
-            ap:lineLabels="left|bottom"
-            ap:lineLabelRotationBottom="-45"/>
+            ap:rangeTitle="HR (bpm)"/>
 
     </LinearLayout>
 
