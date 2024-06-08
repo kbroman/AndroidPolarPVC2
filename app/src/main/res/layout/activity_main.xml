@@ -7,6 +7,62 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/empty_textView"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.7"
+            android:text=""
+        />
+
+       <com.androidplot.xy.XYPlot
+        style="@style/APDefacto"
+        android:id="@+id/ecgplot"
+        android:layout_width="fill_parent"
+           android:layout_height="0dp"
+           android:layout_weight="1"
+        ap:title="ECG values"
+        ap:rangeTitle="range"
+        ap:domainTitle="domain"
+        ap:lineLabels="left|bottom"
+        ap:lineLabelRotationBottom="-45"/>
+
+        <com.androidplot.xy.XYPlot
+            style="@style/APDefacto"
+            android:id="@+id/pvcplot"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            ap:title="PVC burden"
+            ap:rangeTitle="range"
+            ap:domainTitle="domain"
+            ap:lineLabels="left|bottom"
+            ap:lineLabelRotationBottom="-45"/>
+
+        <com.androidplot.xy.XYPlot
+            style="@style/APDefacto"
+            android:id="@+id/hrplot"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            ap:title="Heart Rate"
+            ap:rangeTitle="range"
+            ap:domainTitle="domain"
+            ap:lineLabels="left|bottom"
+            ap:lineLabelRotationBottom="-45"/>
+
+    </LinearLayout>
+
+
     <Switch
         android:id="@+id/connect_switch"
         android:layout_width="wrap_content"
