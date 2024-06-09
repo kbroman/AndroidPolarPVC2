@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     private var bluetoothEnabled = false
     private var isRecording = false
     private var filePath: String? = ""
-    private var mECGplot: XYPlot? = null
+    private var ECGplot: XYPlot? = null
 
     companion object {
         private const val TAG = "PolarPVC2main"
@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        mECGplot = findViewById(R.id.ecgplot)
+        ECGplot = findViewById(R.id.ecgplot)
 
         api.setPolarFilter(false)
         api.setApiCallback(object : PolarBleApiCallback() {
@@ -242,8 +242,8 @@ class MainActivity : AppCompatActivity() {
         api.foregroundEntered()
 
         if (ecgPlotter == null) {
-            mECGplot!!.post({
-                ecgPlotter = ECGplotter(this, mECGplot) })
+            ECGplot!!.post({
+                ecgPlotter = ECGplotter(this, ECGplot) })
         }
     }
 
