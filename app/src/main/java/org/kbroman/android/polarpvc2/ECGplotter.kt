@@ -33,7 +33,6 @@ class ECGplotter (private var mActivity: MainActivity?, private var mPlot: XYPlo
 
 
     init {
-        Log.i(TAG, "started init")
         nData = 0L
         mFormatter1 = LineAndPointFormatter( Color.rgb(0x11, 0x11, 0x11),  // black lines
             null, null, null)
@@ -57,21 +56,15 @@ class ECGplotter (private var mActivity: MainActivity?, private var mPlot: XYPlo
     }
 
     fun setupPlot() {
-        Log.i(TAG, "started setupPlot")
-
         try {
             // range (y-axis)
             mPlot!!.setRangeBoundaries(-2.0, 2.0, BoundaryMode.FIXED)
-            val color = mPlot!!.graph.rangeGridLinePaint.color
-            mPlot!!.graph.rangeOriginLinePaint.color = color
-            mPlot!!.graph.rangeOriginLinePaint.strokeWidth = PixelUtils.dpToPix(1.5f)
             mPlot!!.setRangeStep(StepMode.INCREMENT_BY_VAL, 0.5)
-            mPlot!!.linesPerRangeLabel = 5
             mPlot!!.setUserRangeOrigin(0.0)
 
             // domain (x-axis)
             updateDomainBoundaries()
-            mPlot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 130.0/5.0)
+            mPlot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 1.0)
 
             update()
         } catch (ex: Exception) {
@@ -124,26 +117,22 @@ class ECGplotter (private var mActivity: MainActivity?, private var mPlot: XYPlo
     }
 
     fun addPeakValue(time: Double?, volt: Double?) {
-        //removeOutOfRangeValues()
+        removeOutOfRangeValues()
         mSeries2!!.addLast(time, volt)
-        Log.i(TAG, "peak at time=${time} volt=${volt}  xmax=${mSeries1!!.getxVals().getLast().toDouble()}")
         update()
     }
 
     fun replaceLastPeakValue(time: Double?, volt: Double?) {
-        //removeOutOfRangeValues()
+        removeOutOfRangeValues()
         mSeries2!!.removeLast()
         mSeries2!!.addLast(time, volt)
-        Log.i(TAG, "adjusted peak to time=${time} volt=${volt}  xmax=${mSeries1!!.getxVals().getLast().toDouble()}")
 
         update()
     }
 
     fun addPVCValue(time: Double?, volt: Double?) {
-        //removeOutOfRangeValues()
+        removeOutOfRangeValues()
         mSeries3!!.addLast(time, volt)
-        Log.i(TAG, "pvc at time=${time} volt=${volt}  xmax=${mSeries1!!.getxVals().getLast().toDouble()}")
-
         update()
     }
 

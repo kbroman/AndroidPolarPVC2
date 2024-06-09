@@ -98,6 +98,7 @@ class PeakDetection(var mActivity: MainActivity) {
                     lastPeakIndex = thisPeakIndex
                     peakIndexes.setLast(thisPeakIndex)
                     mActivity.ecgPlotter!!.replaceLastPeakValue(ecgData.time.get(thisPeakIndex)/1e9, ecgData.volt.get(thisPeakIndex))
+                    Log.i(TAG,"adjusted peak")
                 }
             }
         }
@@ -132,8 +133,6 @@ class PeakDetection(var mActivity: MainActivity) {
             )
 
             val hr_bpm = 60.0 / rrData.average()
-
-            Log.i(TAG, "pvc = ${pvcData.average()} rr = ${rrData.average()} hr = $hr_bpm")
         }
     }
 

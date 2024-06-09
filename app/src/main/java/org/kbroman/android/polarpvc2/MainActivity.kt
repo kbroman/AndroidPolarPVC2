@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun deviceConnected(polarDeviceInfo: PolarDeviceInfo) {
-                Log.i(TAG, "CONNECTED: ${polarDeviceInfo.deviceId}")
+                Log.i(TAG, "Connected: ${polarDeviceInfo.deviceId}")
                 deviceId = polarDeviceInfo.deviceId
                 deviceConnected = true
                 binding.connectSwitch.isChecked = true
@@ -101,11 +101,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun deviceConnecting(polarDeviceInfo: PolarDeviceInfo) {
-                Log.i(TAG, "CONNECTING: ${polarDeviceInfo.deviceId}")
+                Log.i(TAG, "Connecting: ${polarDeviceInfo.deviceId}")
             }
 
             override fun deviceDisconnected(polarDeviceInfo: PolarDeviceInfo) {
-                Log.i(TAG, "DISCONNECTED: ${polarDeviceInfo.deviceId}")
+                Log.i(TAG, "Disconnected: ${polarDeviceInfo.deviceId}")
                 deviceConnected = false
                 binding.connectSwitch.isChecked = false
                 binding.deviceTextView.text = ""
@@ -113,11 +113,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun disInformationReceived(identifier: String, uuid: UUID, value: String) {
-                Log.i(TAG, "DIS INFO uuid: $uuid value: $value")
+                Log.i(TAG, "Dis Info uuid: $uuid value: $value")
             }
 
             override fun batteryLevelReceived(identifier: String, level: Int) {
-                Log.i(TAG, "BATTERY LEVEL: $level")
+                Log.i(TAG, "Battery Level: $level")
                 binding.batteryTextView.text = "Battery level $level"
 
 
@@ -242,12 +242,8 @@ class MainActivity : AppCompatActivity() {
         api.foregroundEntered()
 
         if (ecgPlotter == null) {
-            Log.i(TAG, "hello")
-            Log.i(TAG, "${mECGplot == null}")
-
             mECGplot!!.post({
                 ecgPlotter = ECGplotter(this, mECGplot) })
-            Log.i(TAG, "started ECGplotter")
         }
     }
 
