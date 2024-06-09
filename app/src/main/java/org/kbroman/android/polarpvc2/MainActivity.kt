@@ -338,9 +338,12 @@ class MainActivity : AppCompatActivity() {
                             binding.pvcTextView.text = "${Math.round(pvc_ave)}% pvc"
                             binding.hrTextView.text = "${Math.round(hr_bpm)} bpm"
 
-                            // add to hr and pvc plots
-                            hrPlotter!!.addValues(pd.rrData.lastTime, hr_bpm)
-                            pvcPlotter!!.addValues(pd.pvcData.lastTime, pvc_ave)
+
+                            if (pd.rrData.size() > 10) {
+                                // add to hr and pvc plots
+                                hrPlotter!!.addValues(pd.rrData.lastTime, hr_bpm)
+                                pvcPlotter!!.addValues(pd.pvcData.lastTime, pvc_ave)
+                            }
                         }
                     },
                     { error: Throwable ->
