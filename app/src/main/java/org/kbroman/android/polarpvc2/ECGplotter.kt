@@ -11,7 +11,7 @@ import com.androidplot.xy.XYPlot
 import com.androidplot.xy.XYRegionFormatter
 import com.androidplot.xy.XYSeriesFormatter
 
-class ECGplotter (private var mActivity: MainActivity?, private var mPlot: XYPlot?) {
+class ECGplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?) {
     private var nData: Long = 0
     companion object {
         private const val TAG = "PolarPVC2plot"
@@ -20,47 +20,47 @@ class ECGplotter (private var mActivity: MainActivity?, private var mPlot: XYPlo
     }
 
     // ECG
-    private var mFormatter1: XYSeriesFormatter<XYRegionFormatter>? = null
-    var mSeries1: SimpleXYSeries? = null
+    private var formatterECG: XYSeriesFormatter<XYRegionFormatter>? = null
+    var seriesECG: SimpleXYSeries? = null
 
     // Peaks
-    private var mFormatter2: XYSeriesFormatter<XYRegionFormatter>? = null
-    var mSeries2: SimpleXYSeries? = null
+    private var formatterPeaks: XYSeriesFormatter<XYRegionFormatter>? = null
+    var seriesPeaks: SimpleXYSeries? = null
 
     // PVC
-    private var mFormatter3: XYSeriesFormatter<XYRegionFormatter>? = null
-    var mSeries3: SimpleXYSeries? = null
+    private var formatterPVC: XYSeriesFormatter<XYRegionFormatter>? = null
+    var seriesPVC: SimpleXYSeries? = null
 
 
     init {
         nData = 0L
-        mFormatter1 = LineAndPointFormatter( Color.rgb(0x11, 0x11, 0x11),  // black lines
-            null, null, null)
-        mFormatter1!!.setLegendIconEnabled(false)
-        mSeries1 = SimpleXYSeries("ECG")
+        formatterECG = LineAndPointFormatter(Color.rgb(0x11 , 0x11, 0x11),
+            null, null, null)  // black lines
+        seriesECG = SimpleXYSeries("ECG")
 
-        mFormatter2 = LineAndPointFormatter(null, Color.rgb(0xFF, 0x41, 0x36), // red points
+        formatterPeaks = LineAndPointFormatter(null, Color.rgb(0xFF, 0x41, 0x36), // red points
             null, null) // red color
-        mFormatter2!!.setLegendIconEnabled(false)
-        mSeries2 = SimpleXYSeries("Peaks")
+        formatterPeaks!!.setLegendIconEnabled(false)
+        seriesPeaks = SimpleXYSeries("Peaks")
 
-        mFormatter3 = LineAndPointFormatter(null, Color.rgb(0x00, 0x74, 0xD9), // blue points
+        formatterPVC = LineAndPointFormatter(null, Color.rgb(0x00, 0x74, 0xD9), // blue points
             null, null)
-        mFormatter3!!.setLegendIconEnabled(false)
-        mSeries3 = SimpleXYSeries("PVC")
+        formatterPVC!!.setLegendIconEnabled(false)
+        seriesPVC = SimpleXYSeries("PVC")
 
-        mPlot!!.addSeries(mSeries1, mFormatter1)
-        mPlot!!.addSeries(mSeries2, mFormatter2)
-        mPlot!!.addSeries(mSeries3, mFormatter3)
+
+        Plot!!.addSeries(seriesECG, formatterECG)
+        Plot!!.addSeries(seriesPeaks, formatterPeaks)
+        Plot!!.addSeries(seriesPVC, formatterPVC)
         setupPlot()
     }
 
     fun setupPlot() {
         try {
             // range (y-axis)
-            mPlot!!.setRangeBoundaries(-1.5, 1.5, BoundaryMode.FIXED)
-            mPlot!!.setRangeStep(StepMode.INCREMENT_BY_VAL, 0.5)
-            mPlot!!.setUserRangeOrigin(0.0)
+            Plot!!.setRangeBoundaries(-1.5, 1.5, BoundaryMode.FIXED)
+            Plot!!.setRangeStep(StepMode.INCREMENT_BY_VAL, 0.5)
+            Plot!!.setUserRangeOrigin(0.0)
 
             // domain (x-axis)
             updateDomainBoundaries()
@@ -73,24 +73,24 @@ class ECGplotter (private var mActivity: MainActivity?, private var mPlot: XYPlo
 
     fun getNewInstance(activity: MainActivity, plot: XYPlot): ECGplotter {
         val newPlotter = ECGplotter(activity, plot)
-        newPlotter.mPlot = plot
+        newPlotter.Plot = plot
         newPlotter.mActivity = this.mActivity
         newPlotter.nData = this.nData
 
-        newPlotter.mFormatter1 = this.mFormatter1
-        newPlotter.mSeries1 = this.mSeries1
+        newPlotter.formatterECG = this.formatterECG
+        newPlotter.seriesECG = this.seriesECG
 
-        newPlotter.mFormatter2 = this.mFormatter2
-        newPlotter.mSeries2 = this.mSeries2
+        newPlotter.formatterPeaks = this.formatterPeaks
+        newPlotter.seriesPeaks = this.seriesPeaks
 
-        newPlotter.mFormatter3 = this.mFormatter3
-        newPlotter.mSeries3 = this.mSeries3
+        newPlotter.formatterPVC = this.formatterPVC
+        newPlotter.seriesPVC = this.seriesPVC
 
 
         try {
-            newPlotter.mPlot!!.addSeries(mSeries1, mFormatter1)
-            newPlotter.mPlot!!.addSeries(mSeries2, mFormatter2)
-            newPlotter.mPlot!!.addSeries(mSeries3, mFormatter3)
+            newPlotter.Plot!!.addSeries(seriesECG, formatterECG)
+            newPlotter.Plot!!.addSeries(seriesPeaks, formatterPeaks)
+            newPlotter.Plot!!.addSeries(seriesPVC, formatterPVC)
             newPlotter.setupPlot()
         } catch (ex: Exception) {
             Log.e(TAG, "trouble setting up new plot")
@@ -103,10 +103,10 @@ class ECGplotter (private var mActivity: MainActivity?, private var mPlot: XYPlo
 
     fun addValues(time: Double?, volt: Double?) {
         if (time != null && volt != null) {
-            if (mSeries1!!.size() >= N_TOTAL_POINTS) {
-                mSeries1!!.removeFirst()
+            if (seriesECG!!.size() >= N_TOTAL_POINTS) {
+                seriesECG!!.removeFirst()
             }
-            mSeries1!!.addLast(time, volt)
+            seriesECG!!.addLast(time, volt)
             nData++
         }
 
@@ -117,56 +117,56 @@ class ECGplotter (private var mActivity: MainActivity?, private var mPlot: XYPlo
 
     fun addPeakValue(time: Double?, volt: Double?) {
         removeOutOfRangeValues()
-        mSeries2!!.addLast(time, volt)
+        seriesPeaks!!.addLast(time, volt)
         update()
     }
 
     fun replaceLastPeakValue(time: Double?, volt: Double?) {
         removeOutOfRangeValues()
-        mSeries2!!.removeLast()
-        mSeries2!!.addLast(time, volt)
+        seriesPeaks!!.removeLast()
+        seriesPeaks!!.addLast(time, volt)
 
         update()
     }
 
     fun addPVCValue(time: Double?, volt: Double?) {
         removeOutOfRangeValues()
-        mSeries3!!.addLast(time, volt)
+        seriesPVC!!.addLast(time, volt)
         update()
     }
 
     fun removeOutOfRangeValues() {
-        var xMin: Double = mSeries1!!.getxVals().getLast().toDouble() - SEC_TO_PLOT
+        var xMin: Double = seriesECG!!.getxVals().getLast().toDouble() - SEC_TO_PLOT
 
         // Remove old values if needed
-        while (mSeries2!!.size() > 0 && mSeries2!!.getxVals().getFirst().toDouble() < xMin) {
-            mSeries2!!.removeFirst()
+        while (seriesPeaks!!.size() > 0 && seriesPeaks!!.getxVals().getFirst().toDouble() < xMin) {
+            seriesPeaks!!.removeFirst()
         }
 
-        while (mSeries3!!.size() > 0 && mSeries3!!.getxVals().getFirst().toDouble() < xMin) {
-            mSeries3!!.removeFirst()
+        while (seriesPVC!!.size() > 0 && seriesPVC!!.getxVals().getFirst().toDouble() < xMin) {
+            seriesPVC!!.removeFirst()
         }
     }
 
     fun updateDomainBoundaries() {
-        val xMax: Double = mSeries1!!.getxVals().getLast().toDouble()
+        val xMax: Double = seriesECG!!.getxVals().getLast().toDouble()
         val xMin: Double = xMax - SEC_TO_PLOT
 
-        mPlot!!.setDomainBoundaries(xMin, xMax, BoundaryMode.FIXED)
-        mPlot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 1.0)
+        Plot!!.setDomainBoundaries(xMin, xMax, BoundaryMode.FIXED)
+        Plot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 1.0)
     }
 
     fun update() {
         if (nData % 73 == 0L) {
-            mActivity!!.runOnUiThread { mPlot!!.redraw() }
+            mActivity!!.runOnUiThread { Plot!!.redraw() }
         }
     }
 
     fun clear() {
         nData = 0
-        mSeries1!!.clear()
-        mSeries2!!.clear()
-        mSeries3!!.clear()
+        seriesECG!!.clear()
+        seriesPeaks!!.clear()
+        seriesPVC!!.clear()
         update()
     }
 }
