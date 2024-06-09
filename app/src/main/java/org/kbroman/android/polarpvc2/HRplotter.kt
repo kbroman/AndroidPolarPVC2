@@ -50,8 +50,6 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
             Plot!!.getGraph().setLineLabelEdges(
                 XYGraphWidget.Edge.LEFT) //  XYGraphWidget.Edge.BOTTOM
 
-            // domain and range boundaries
-            updateBoundaries()
             update()
         } catch (ex: Exception) {
             Log.e(TAG, "Problem setting up hr plot")
@@ -91,8 +89,6 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
         if(hr < yMin) { yMin = hr }
         if(hr > yMax) { yMax = hr }
 
-        // Reset the domain boundaries
-        updateBoundaries()
         update()
     }
 
@@ -101,7 +97,10 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
         Plot!!.setRangeBoundaries(yMin, yMax, BoundaryMode.FIXED)
     }
 
+
     fun update() {
+        updateBoundaries()
+
         mActivity!!.runOnUiThread { Plot!!.redraw() }
     }
 

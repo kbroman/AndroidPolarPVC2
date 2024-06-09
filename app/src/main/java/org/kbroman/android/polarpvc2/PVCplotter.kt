@@ -45,8 +45,6 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
             Plot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 60*15.0)
             Plot!!.setRangeStep(StepMode.INCREMENT_BY_VAL, 10.0)
 
-            // domain and range boundaries
-            updateBoundaries()
             update()
         } catch (ex: Exception) {
             Log.e(TAG, "Problem setting up pvc plot")
@@ -85,8 +83,6 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
             if(time < xMin) { xMin = time }
         }
 
-        // Reset the domain and range boundaries
-        updateBoundaries()
         update()
     }
 
@@ -97,6 +93,7 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
     }
 
     fun update() {
+        updateBoundaries()
         mActivity!!.runOnUiThread { Plot!!.redraw() }
     }
 
