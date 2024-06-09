@@ -5,6 +5,7 @@ import java.util.ArrayList
 class RunningAverage(private val maxItems: Int) {
     private val list = ArrayList<Double>()
     private var sum: Double = 0.0
+    var lastTime: Double = -1.0;
 
     init {
         sum = 0.0

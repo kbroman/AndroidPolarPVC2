@@ -118,10 +118,12 @@ class PeakDetection(var mActivity: MainActivity) {
 
             if (minPeakIndex >= PVC_RS_DIST) { // looks like a PVC
                 pvcData.add(1.0)
+                pvcData.lastTime = ecgData.time.get(lastPeakIndex)/1e9
                 Log.wtf(TAG, "*** PVC ***")
                 mActivity.ecgPlotter!!.addPVCValue(ecgData.time.get(lastPeakIndex)/1e9, ecgData.volt.get(lastPeakIndex))
             } else {                          // not a PVC
                 pvcData.add(0.0)
+                pvcData.lastTime = ecgData.time.get(lastPeakIndex)/1e9
                 Log.i(TAG, "not PVC")
             }
 
@@ -131,6 +133,7 @@ class PeakDetection(var mActivity: MainActivity) {
                         ecgData.time.get(peakIndexes.get(peakIndexes.size() - 3)) )*1e-9
 
             )
+            rrData.lastTime = ecgData.time.get(lastPeakIndex)/1e9
 
             val hr_bpm = 60.0 / rrData.average()
         }

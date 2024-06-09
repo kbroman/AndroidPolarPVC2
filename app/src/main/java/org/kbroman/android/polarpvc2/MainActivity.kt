@@ -39,6 +39,8 @@ class MainActivity : AppCompatActivity() {
     private var isRecording = false
     private var filePath: String? = ""
     private var ECGplot: XYPlot? = null
+    private var HRplot: XYPlot? = null
+    private var PVCplot: XYPlot? = null
 
     companion object {
         private const val TAG = "PolarPVC2main"
@@ -62,6 +64,8 @@ class MainActivity : AppCompatActivity() {
     val pd: PeakDetection = PeakDetection(this)
     val wd: WriteData = WriteData(this)
     var ecgPlotter: ECGplotter? = null
+    var hrPlotter: HRplotter? = null
+    var pvcPlotter: PVCplotter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +82,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         ECGplot = findViewById(R.id.ecgplot)
+        HRplot = findViewById(R.id.hrplot)
+        PVCplot = findViewById(R.id.pvcplot)
 
         api.setPolarFilter(false)
         api.setApiCallback(object : PolarBleApiCallback() {
@@ -245,6 +251,14 @@ class MainActivity : AppCompatActivity() {
             ECGplot!!.post({
                 ecgPlotter = ECGplotter(this, ECGplot) })
         }
+        if (hrPlotter == null) {
+            HRplot!!.post({
+                hrPlotter = HRplotter(this, HRplot) })
+        }
+        if (pvcPlotter == null) {
+            PVCplot!!.post({
+                pvcPlotter = PVCplotter(this, PVCplot) })
+        }
     }
 
     public override fun onDestroy() {
@@ -318,12 +332,15 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         if(pd.rrData.size() > 1) {
-                            val hr_bpm = Math.round(60.0 / pd.rrData.average())
-                            val pvc_ave = Math.round(pd.pvcData.average() * 100)
+                            val hr_bpm: Double = 60.0 / pd.rrData.average()
+                            val pvc_ave: Double = pd.pvcData.average() * 100.0
                             Log.i(TAG, "pvc = ${pvc_ave}   hr=${hr_bpm}")
-                            binding.pvcTextView.text = "${pvc_ave}% pvc"
-                            binding.hrTextView.text = "${hr_bpm} bpm"
+                            binding.pvcTextView.text = "${Math.round(pvc_ave)}% pvc"
+                            binding.hrTextView.text = "${Math.round(hr_bpm)} bpm"
 
+                            // add to hr and pvc plots
+                            hrPlotter!!.addValues(pd.rrData.lastTime, hr_bpm)
+                            pvcPlotter!!.addValues(pd.pvcData.lastTime, pvc_ave)
                         }
                     },
                     { error: Throwable ->
