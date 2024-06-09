@@ -45,7 +45,7 @@ class PeakDetection(var mActivity: MainActivity) {
             val timestamp = data.timeStamp + TIMESTAMP_OFFSET
 
             ecgData.add(timestamp, voltage)
-      //      mActivity.ecgplotter.addValues(timestamp/1e9, voltage)
+            mActivity.ecgPlotter!!.addValues(timestamp/1e9, voltage)
         }
         val n: Int = ecgData.maxIndex() - start
 
@@ -91,13 +91,13 @@ class PeakDetection(var mActivity: MainActivity) {
                 last_smsqdiff = this_smsqdiff
                 lastPeakIndex = thisPeakIndex
                 peakIndexes.add(thisPeakIndex)
-         //       mActivity.ecgplotter.addPeakValue(ecgData.time.get(thisPeakIndex)/1e-9, ecgData.volt.get(thisPeakIndex))
+                mActivity.ecgPlotter!!.addPeakValue(ecgData.time.get(thisPeakIndex)/1e9, ecgData.volt.get(thisPeakIndex))
             } else { // too close to previous peak
                 if (this_smsqdiff > last_smsqdiff) {
                     last_smsqdiff = this_smsqdiff
                     lastPeakIndex = thisPeakIndex
                     peakIndexes.setLast(thisPeakIndex)
-         //           mActivity.ecgplotter.replaceLastPeakValue(ecgData.time.get(thisPeakIndex)/1e-9, ecgData.volt.get(thisPeakIndex))
+                    mActivity.ecgPlotter!!.replaceLastPeakValue(ecgData.time.get(thisPeakIndex)/1e9, ecgData.volt.get(thisPeakIndex))
                 }
             }
         }
@@ -118,7 +118,7 @@ class PeakDetection(var mActivity: MainActivity) {
             if (minPeakIndex >= PVC_RS_DIST) { // looks like a PVC
                 pvcData.add(1.0)
                 Log.wtf(TAG, "*** PVC ***")
-           //     mActivity.ecgplotter.addPVCValue(ecgData.time.get(lastPeakIndex)/1e-9, ecgData.volt.get(lastPeakIndex))
+                mActivity.ecgPlotter!!.addPVCValue(ecgData.time.get(lastPeakIndex)/1e9, ecgData.volt.get(lastPeakIndex))
             } else {                          // not a PVC
                 pvcData.add(0.0)
                 Log.i(TAG, "not PVC")

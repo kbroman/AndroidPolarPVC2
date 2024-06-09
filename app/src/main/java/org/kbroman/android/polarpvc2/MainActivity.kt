@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
 
     val pd: PeakDetection = PeakDetection(this)
     val wd: WriteData = WriteData(this)
-    //val ecgplotter: ECGplotter = ECGplotter(this, mECGplot)
+    var ecgPlotter: ECGplotter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,15 +70,14 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
 
-        mECGplot = findViewById(R.id.ecgplot)
-        Log.i(TAG, "just did mECGplot findViewById")
-
         setContentView(view)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        mECGplot = findViewById(R.id.ecgplot)
 
         api.setPolarFilter(false)
         api.setApiCallback(object : PolarBleApiCallback() {
@@ -241,6 +240,15 @@ class MainActivity : AppCompatActivity() {
     public override fun onResume() {
         super.onResume()
         api.foregroundEntered()
+
+        if (ecgPlotter == null) {
+            Log.i(TAG, "hello")
+            Log.i(TAG, "${mECGplot == null}")
+
+            mECGplot!!.post({
+                ecgPlotter = ECGplotter(this, mECGplot) })
+            Log.i(TAG, "started ECGplotter")
+        }
     }
 
     public override fun onDestroy() {
