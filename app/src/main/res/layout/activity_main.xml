@@ -106,11 +106,11 @@
         app:renderMode="use_background_thread"/>
 
     <com.androidplot.xy.XYPlot
-        style="@style/FullScreenGraph"
+        style="@style/APDefacto.Light"
         app:graphBackgroundColor="@color/white"
         app:gridBackgroundColor="@color/grayE"
-        app:graphMarginBottom="30dp"
-        app:graphMarginLeft="40dp"
+        app:graphMarginBottom="20dp"
+        app:graphMarginLeft="20dp"
         app:graphMarginTop="20dp"
         app:graphMarginRight="0dp"
         android:id="@+id/pvcplot"
@@ -119,11 +119,11 @@
         android:layout_weight="1"/>
 
     <com.androidplot.xy.XYPlot
-        style="@style/FullScreenGraph"
+        style="@style/APDefacto.Light"
         app:graphBackgroundColor="@color/white"
         app:gridBackgroundColor="@color/grayE"
-        app:graphMarginBottom="30dp"
-        app:graphMarginLeft="40dp"
+        app:graphMarginBottom="20dp"
+        app:graphMarginLeft="20dp"
         app:graphMarginTop="20dp"
         app:graphMarginRight="0dp"
         android:id="@+id/hrplot"

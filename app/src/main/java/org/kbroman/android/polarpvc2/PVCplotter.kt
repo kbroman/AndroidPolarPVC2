@@ -7,12 +7,16 @@ import com.androidplot.xy.BoundaryMode
 import com.androidplot.xy.LineAndPointFormatter
 import com.androidplot.xy.SimpleXYSeries
 import com.androidplot.xy.StepMode
+import com.androidplot.xy.XYGraphWidget
 import com.androidplot.xy.XYPlot
 import com.androidplot.xy.XYRegionFormatter
 import com.androidplot.xy.XYSeriesFormatter
 
 class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?) {
-    private var nData: Long = 0
+    private var yMax: Double = 40.0
+    private var xMin: Double = Double.MAX_VALUE
+    private var xMax: Double = -Double.MAX_VALUE
+
     companion object {
         private const val TAG = "PolarPVC2plotpvc"
         private const val N_TOTAL_POINTS: Int = 150*60*24   // maximum number of data points
@@ -23,10 +27,13 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
 
 
     init {
-        nData = 0L
         formatterPVC = LineAndPointFormatter(Color.rgb(0x00 , 0x74, 0xD9), // blue lines
             null, null, null)
+        formatterPVC!!.setLegendIconEnabled(false)
         seriesPVC = SimpleXYSeries("PVC")
+
+        Plot!!.getGraph().setLineLabelEdges(
+            XYGraphWidget.Edge.LEFT) //  XYGraphWidget.Edge.BOTTOM
 
         Plot!!.addSeries(seriesPVC, formatterPVC)
         setupPlot()
@@ -34,13 +41,12 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
 
     fun setupPlot() {
         try {
-            // PVC range (y-axis)
-            Plot!!.setRangeBoundaries(0.0, 40.0, BoundaryMode.FIXED)
-            Plot!!.setRangeStep(StepMode.INCREMENT_BY_VAL, 5.0)
+            // frequency of x- and y-axis lines
+            Plot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 60*15.0)
+            Plot!!.setRangeStep(StepMode.INCREMENT_BY_VAL, 10.0)
 
-            // domain (x-axis)
-            updateDomainBoundaries()
-
+            // domain and range boundaries
+            updateBoundaries()
             update()
         } catch (ex: Exception) {
             Log.e(TAG, "Problem setting up pvc plot")
@@ -51,7 +57,6 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
         val newPlotter = PVCplotter(activity, plot)
         newPlotter.Plot = plot
         newPlotter.mActivity = this.mActivity
-        newPlotter.nData = this.nData
 
         newPlotter.formatterPVC = this.formatterPVC
         newPlotter.seriesPVC = this.seriesPVC
@@ -68,26 +73,27 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
 
 
 
-    fun addValues(time: Double?, pvc: Double?) {
+    fun addValues(time: Double, pvc: Double) {
         if (time != null && pvc != null) {
             if (seriesPVC!!.size() >= N_TOTAL_POINTS) {
                 seriesPVC!!.removeFirst()
             }
             seriesPVC!!.addLast(time, pvc)
-            nData++
+
+            if(pvc > yMax) { yMax = pvc }
+            if(time > xMax) { xMax = time }
+            if(time < xMin) { xMin = time }
         }
 
-        // Reset the domain boundaries
-        updateDomainBoundaries()
+        // Reset the domain and range boundaries
+        updateBoundaries()
         update()
     }
 
-    fun updateDomainBoundaries() {
-        val xMax: Double = seriesPVC!!.getxVals().getLast().toDouble()
-        val xMin: Double = seriesPVC!!.getxVals().getFirst().toDouble()
-
+    fun updateBoundaries() {
         Plot!!.setDomainBoundaries(xMin, xMax, BoundaryMode.FIXED)
-        Plot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 60*15.0)
+
+        Plot!!.setRangeBoundaries(0.0, yMax, BoundaryMode.FIXED)
     }
 
     fun update() {
@@ -95,7 +101,6 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
     }
 
     fun clear() {
-        nData = 0
         seriesPVC!!.clear()
         update()
     }

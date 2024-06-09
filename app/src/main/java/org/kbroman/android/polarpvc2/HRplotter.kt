@@ -7,12 +7,20 @@ import com.androidplot.xy.BoundaryMode
 import com.androidplot.xy.LineAndPointFormatter
 import com.androidplot.xy.SimpleXYSeries
 import com.androidplot.xy.StepMode
+import com.androidplot.xy.XYGraphWidget
 import com.androidplot.xy.XYPlot
 import com.androidplot.xy.XYRegionFormatter
 import com.androidplot.xy.XYSeriesFormatter
+import java.text.FieldPosition
+import java.text.ParsePosition
+
 
 class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?) {
-    private var nData: Long = 0
+    private var yMin: Double = 60.0
+    private var yMax: Double = 100.0
+    private var xMin: Double = Double.MAX_VALUE
+    private var xMax: Double = -Double.MAX_VALUE
+
     companion object {
         private const val TAG = "PolarPVC2plotpvc"
         private const val N_TOTAL_POINTS: Int = 150*60*24   // maximum number of data points
@@ -23,9 +31,9 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
 
 
     init {
-        nData = 0L
         formatterHR = LineAndPointFormatter(Color.rgb(0xFF , 0x41, 0x36), // red lines
             null, null, null)
+        formatterHR!!.setLegendIconEnabled(false)
         seriesHR = SimpleXYSeries("HR")
 
         Plot!!.addSeries(seriesHR, formatterHR)
@@ -34,13 +42,16 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
 
     fun setupPlot() {
         try {
-            // HR range (y-axis)
-            Plot!!.setRangeBoundaries(50.0, 135.0, BoundaryMode.FIXED)
+            // frequency of x- and y-axis lines
             Plot!!.setRangeStep(StepMode.INCREMENT_BY_VAL, 10.0)
+            Plot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 60*15.0)
 
-            // domain (x-axis)
-            updateDomainBoundaries()
+            // y-axis labels
+            Plot!!.getGraph().setLineLabelEdges(
+                XYGraphWidget.Edge.LEFT) //  XYGraphWidget.Edge.BOTTOM
 
+            // domain and range boundaries
+            updateBoundaries()
             update()
         } catch (ex: Exception) {
             Log.e(TAG, "Problem setting up hr plot")
@@ -51,7 +62,6 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
         val newPlotter = HRplotter(activity, plot)
         newPlotter.Plot = plot
         newPlotter.mActivity = this.mActivity
-        newPlotter.nData = this.nData
 
         newPlotter.formatterHR = this.formatterHR
         newPlotter.seriesHR = this.seriesHR
@@ -68,26 +78,27 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
 
 
 
-    fun addValues(time: Double?, hr: Double?) {
+    fun addValues(time: Double, hr: Double) {
         if (time != null && hr != null) {
             if (seriesHR!!.size() >= N_TOTAL_POINTS) {
                 seriesHR!!.removeFirst()
             }
             seriesHR!!.addLast(time, hr)
-            nData++
         }
 
+        if(time < xMin) { xMin = time }
+        if(time > xMax) { xMax = time }
+        if(hr < yMin) { yMin = hr }
+        if(hr > yMax) { yMax = hr }
+
         // Reset the domain boundaries
-        updateDomainBoundaries()
+        updateBoundaries()
         update()
     }
 
-    fun updateDomainBoundaries() {
-        val xMax: Double = seriesHR!!.getxVals().getLast().toDouble()
-        val xMin: Double = seriesHR!!.getxVals().getFirst().toDouble()
-
+    fun updateBoundaries() {
         Plot!!.setDomainBoundaries(xMin, xMax, BoundaryMode.FIXED)
-        Plot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 60*15.0)
+        Plot!!.setRangeBoundaries(yMin, yMax, BoundaryMode.FIXED)
     }
 
     fun update() {
@@ -95,7 +106,6 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
     }
 
     fun clear() {
-        nData = 0
         seriesHR!!.clear()
         update()
     }
