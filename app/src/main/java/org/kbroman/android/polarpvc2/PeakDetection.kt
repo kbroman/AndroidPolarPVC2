@@ -9,8 +9,8 @@ class PeakDetection(var mActivity: MainActivity) {
 
     companion object {
         private const val TAG = "PolarPVC2peaks"
-        private const val N_ECG_VALS: Int = 130*60*60
-        private const val N_PEAKS: Int = 150*60*24*7
+        private const val N_ECG_VALS: Int = 130*60*5
+        private const val N_PEAKS: Int = 150*5
         private const val N_PEAKS_FOR_RR_AVE = 25
         private const val N_PEAKS_FOR_PVC_AVE = 100
         private const val PVC_RS_DIST: Double = 5.0
@@ -103,8 +103,8 @@ class PeakDetection(var mActivity: MainActivity) {
 
         // now look at whether penultimate peak was a PVC
         if (peakFound && peakIndexes.size() > INITIAL_PEAKS_TO_SKIP) {
-            val lastPeakIndex = peakIndexes.get(peakIndexes.size() - 2)
-            val thisPeakIndex = peakIndexes.get(peakIndexes.size() - 1)
+            val lastPeakIndex = peakIndexes.get(peakIndexes.maxIndex() - 2)
+            val thisPeakIndex = peakIndexes.get(peakIndexes.maxIndex() - 1)
 
             val temp_ecg = ArrayList<Double>()
 
@@ -127,8 +127,8 @@ class PeakDetection(var mActivity: MainActivity) {
 
             // get RR distance based on timestamps, in seconds
             rrData.add(
-                (ecgData.time.get(peakIndexes.get(peakIndexes.size() - 2)) -
-                        ecgData.time.get(peakIndexes.get(peakIndexes.size() - 3)) )*1e-9
+                (ecgData.time.get(peakIndexes.get(peakIndexes.maxIndex() - 2)) -
+                        ecgData.time.get(peakIndexes.get(peakIndexes.maxIndex() - 3)) )*1e-9
 
             )
             rrData.lastTime = ecgData.time.get(lastPeakIndex)/1e9
