@@ -86,7 +86,7 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
 
         if(time < xMin) { xMin = time }
         if(time > xMax) { xMax = time }
-        if(hr < yMin) { yMin = hr }
+        if(hr < yMin) { yMin = Math.floor(hr/10.0)*10.0 }
         if(hr > yMax) { yMax = hr }
 
         update()
