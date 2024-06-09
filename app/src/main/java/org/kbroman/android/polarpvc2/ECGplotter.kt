@@ -44,7 +44,7 @@ class ECGplotter (private var mActivity: MainActivity?, private var mPlot: XYPlo
         mFormatter2!!.setLegendIconEnabled(false)
         mSeries2 = SimpleXYSeries("Peaks")
 
-        mFormatter3 = LineAndPointFormatter(null, Color.rgb(0x01, 0xFF, 0x70), // lime green points
+        mFormatter3 = LineAndPointFormatter(null, Color.rgb(0x00, 0x74, 0xD9), // blue points
             null, null)
         mFormatter3!!.setLegendIconEnabled(false)
         mSeries3 = SimpleXYSeries("PVC")
@@ -58,13 +58,12 @@ class ECGplotter (private var mActivity: MainActivity?, private var mPlot: XYPlo
     fun setupPlot() {
         try {
             // range (y-axis)
-            mPlot!!.setRangeBoundaries(-2.0, 2.0, BoundaryMode.FIXED)
+            mPlot!!.setRangeBoundaries(-1.5, 1.5, BoundaryMode.FIXED)
             mPlot!!.setRangeStep(StepMode.INCREMENT_BY_VAL, 0.5)
             mPlot!!.setUserRangeOrigin(0.0)
 
             // domain (x-axis)
             updateDomainBoundaries()
-            mPlot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 1.0)
 
             update()
         } catch (ex: Exception) {
@@ -154,6 +153,7 @@ class ECGplotter (private var mActivity: MainActivity?, private var mPlot: XYPlo
         val xMin: Double = xMax - SEC_TO_PLOT
 
         mPlot!!.setDomainBoundaries(xMin, xMax, BoundaryMode.FIXED)
+        mPlot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 1.0)
     }
 
     fun update() {
