@@ -2,13 +2,10 @@ package org.kbroman.android.polarpvc2
 
 import android.util.Log
 import com.polar.sdk.api.model.PolarEcgData
-import kotlin.Double
-import kotlin.Int
-import kotlin.Long
 import kotlin.math.max
 import kotlin.math.min
 
-class PeakDetection {
+class PeakDetection(var mActivity: MainActivity) {
 
     companion object {
         private const val TAG = "PolarPVC2peaks"
@@ -47,7 +44,8 @@ class PeakDetection {
             val voltage : Double = (data.voltage.toFloat() / 1000.0)
             val timestamp = data.timeStamp + TIMESTAMP_OFFSET
 
-            ecgData.add(voltage, timestamp)
+            ecgData.add(timestamp, voltage)
+      //      mActivity.ecgplotter.addValues(timestamp/1e9, voltage)
         }
         val n: Int = ecgData.maxIndex() - start
 
@@ -93,11 +91,13 @@ class PeakDetection {
                 last_smsqdiff = this_smsqdiff
                 lastPeakIndex = thisPeakIndex
                 peakIndexes.add(thisPeakIndex)
+         //       mActivity.ecgplotter.addPeakValue(ecgData.time.get(thisPeakIndex)/1e-9, ecgData.volt.get(thisPeakIndex))
             } else { // too close to previous peak
                 if (this_smsqdiff > last_smsqdiff) {
                     last_smsqdiff = this_smsqdiff
                     lastPeakIndex = thisPeakIndex
                     peakIndexes.setLast(thisPeakIndex)
+         //           mActivity.ecgplotter.replaceLastPeakValue(ecgData.time.get(thisPeakIndex)/1e-9, ecgData.volt.get(thisPeakIndex))
                 }
             }
         }
@@ -118,6 +118,7 @@ class PeakDetection {
             if (minPeakIndex >= PVC_RS_DIST) { // looks like a PVC
                 pvcData.add(1.0)
                 Log.wtf(TAG, "*** PVC ***")
+           //     mActivity.ecgplotter.addPVCValue(ecgData.time.get(lastPeakIndex)/1e-9, ecgData.volt.get(lastPeakIndex))
             } else {                          // not a PVC
                 pvcData.add(0.0)
                 Log.i(TAG, "not PVC")

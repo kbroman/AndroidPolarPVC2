@@ -4,7 +4,7 @@ class ECGdata(private val maxItems: Int) {
     val volt = FixedSizedList<Double>(maxItems)
     val time = FixedSizedList<Long>(maxItems)
 
-    fun add(voltage : Double, timestamp : Long) {
+    fun add(timestamp : Long, voltage : Double) {
         volt.add(voltage)
         time.add(timestamp)
     }

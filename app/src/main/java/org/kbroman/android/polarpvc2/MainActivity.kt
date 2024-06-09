@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -14,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.androidplot.xy.XYPlot
 import com.polar.sdk.api.PolarBleApi
 import com.polar.sdk.api.PolarBleApiCallback
 import com.polar.sdk.api.PolarBleApiDefaultImpl
@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private var bluetoothEnabled = false
     private var isRecording = false
     private var filePath: String? = ""
+    private var mECGplot: XYPlot? = null
 
     companion object {
         private const val TAG = "PolarPVC2main"
@@ -58,8 +59,9 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    val pd: PeakDetection = PeakDetection()
+    val pd: PeakDetection = PeakDetection(this)
     val wd: WriteData = WriteData(this)
+    //val ecgplotter: ECGplotter = ECGplotter(this, mECGplot)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,6 +69,9 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
+
+        mECGplot = findViewById(R.id.ecgplot)
+        Log.i(TAG, "just did mECGplot findViewById")
 
         setContentView(view)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
