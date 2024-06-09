@@ -33,7 +33,7 @@ class ECGplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
 
 
     init {
-        nData = 0L
+        nData = 0
         formatterECG = LineAndPointFormatter(Color.rgb(0x11 , 0x11, 0x11),  // black lines
             null, null, null)
         seriesECG = SimpleXYSeries("ECG")
@@ -159,7 +159,7 @@ class ECGplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
     }
 
     fun update() {
-        if (nData % 73 == 0L) {
+        if (nData % 73 == 0) {
             mActivity!!.runOnUiThread { Plot!!.redraw() }
         }
     }
