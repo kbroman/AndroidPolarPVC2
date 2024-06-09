@@ -12,7 +12,7 @@ and to estimate the current approximate percent PVC.
 It uses the [Polar SDK](https://github.com/polarofficial/polar-ble-sdk) and
 [Android Plot](https://github.com/halfhp/androidplot).
 
-I learned a great deal from the [KE.Net
+I learned a great deal, and adapted much of the code, from the [KE.Net
 ECG](https://github.com/KennethEvans/KE.Net-ECG) app.
 
 The Device ID is hard-coded in [`MainActivity.kt`](https://github.com/kbroman/AndroidPolarPVC2/blob/main/app/src/main/java/org/kbroman/android/polarpvc2/MainActivity.kt#L33).
