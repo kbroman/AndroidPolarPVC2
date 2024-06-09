@@ -16,7 +16,7 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.85">
+        android:layout_weight="0.9">
 
         <Switch
             android:id="@+id/connect_switch"
@@ -130,5 +130,12 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
+
+    <TextView
+        android:id="@+id/bottom_padding"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.2"
+        android:text=""/>
 
 </LinearLayout>
