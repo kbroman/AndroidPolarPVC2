@@ -41,11 +41,13 @@ class ECGplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
         formatterPeaks = LineAndPointFormatter(null, Color.rgb(0xFF, 0x41, 0x36), // red points
             null, null) // red color
         formatterPeaks!!.setLegendIconEnabled(false)
+        (formatterPeaks as LineAndPointFormatter).getVertexPaint().setStrokeWidth(PixelUtils.dpToPix(7F))
         seriesPeaks = SimpleXYSeries("Peaks")
 
         formatterPVC = LineAndPointFormatter(null, Color.rgb(0x00, 0x74, 0xD9), // blue points
             null, null)
         formatterPVC!!.setLegendIconEnabled(false)
+        (formatterPVC as LineAndPointFormatter).getVertexPaint().setStrokeWidth(PixelUtils.dpToPix(7F))
         seriesPVC = SimpleXYSeries("PVC")
 
 
