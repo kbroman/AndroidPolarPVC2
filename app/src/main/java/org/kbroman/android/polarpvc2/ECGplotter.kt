@@ -12,7 +12,7 @@ import com.androidplot.xy.XYRegionFormatter
 import com.androidplot.xy.XYSeriesFormatter
 
 class ECGplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?) {
-    private var nData: Long = 0
+    private var nData: Int = 0
     companion object {
         private const val TAG = "PolarPVC2plot"
         private const val SEC_TO_PLOT: Double = 10.0   // Show this many seconds

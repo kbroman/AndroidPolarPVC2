@@ -23,7 +23,7 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
 
     companion object {
         private const val TAG = "PolarPVC2plotpvc"
-        private const val N_TOTAL_POINTS: Int = 150*60*24   // maximum number of data points
+        private const val N_TOTAL_POINTS: Int = 150*60*24*7   // maximum number of data points
     }
 
     private var formatterHR: XYSeriesFormatter<XYRegionFormatter>? = null

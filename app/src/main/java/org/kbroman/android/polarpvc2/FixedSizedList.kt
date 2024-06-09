@@ -28,7 +28,7 @@ class FixedSizedList<T>(private val maxItems: Int) {
         list[list.size - 1] = value
     }
 
-    fun size(): Int = list.size
+    fun size() = list.size
 
-    fun maxIndex(): Int = list.size + offset
+    fun maxIndex() = list.size + offset
 }

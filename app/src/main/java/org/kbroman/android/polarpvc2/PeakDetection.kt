@@ -9,8 +9,8 @@ class PeakDetection(var mActivity: MainActivity) {
 
     companion object {
         private const val TAG = "PolarPVC2peaks"
-        private const val N_ECG_VALS = 130*60*60
-        private const val N_PEAKS = 60*60*2
+        private const val N_ECG_VALS: Int = 130*60*60
+        private const val N_PEAKS: Int = 150*60*24*7
         private const val N_PEAKS_FOR_RR_AVE = 25
         private const val N_PEAKS_FOR_PVC_AVE = 100
         private const val PVC_RS_DIST: Double = 5.0
@@ -34,10 +34,8 @@ class PeakDetection(var mActivity: MainActivity) {
     private var thisPeakIndex: Int = -1
 
     fun processData(polarEcgData: PolarEcgData) {
-        val end: Int
-
         // last index
-        var start = ecgData.maxIndex()
+        var start: Int = ecgData.maxIndex()
 
         // grab a batch of data
         for (data in polarEcgData.samples) {
@@ -47,12 +45,12 @@ class PeakDetection(var mActivity: MainActivity) {
             ecgData.add(timestamp, voltage)
             mActivity.ecgPlotter!!.addValues(timestamp/1e9, voltage)
         }
-        val n: Int = ecgData.maxIndex() - start
+        val n = ecgData.maxIndex() - start
 
         if (ecgData.maxIndex() < INITIAL_ECG_TO_SKIP) return  // wait to start looking for peaks
 
         // look for peaks in first half
-        end = start + n / 2
+        var end = start + n / 2
         start = max(0.0, (start - 5).toDouble()).toInt()
         find_peaks(start, end)
 
@@ -105,8 +103,8 @@ class PeakDetection(var mActivity: MainActivity) {
 
         // now look at whether penultimate peak was a PVC
         if (peakFound && peakIndexes.size() > INITIAL_PEAKS_TO_SKIP) {
-            val lastPeakIndex: Int = peakIndexes.get(peakIndexes.size() - 2)
-            val thisPeakIndex: Int = peakIndexes.get(peakIndexes.size() - 1)
+            val lastPeakIndex = peakIndexes.get(peakIndexes.size() - 2)
+            val thisPeakIndex = peakIndexes.get(peakIndexes.size() - 1)
 
             val temp_ecg = ArrayList<Double>()
 
@@ -134,8 +132,6 @@ class PeakDetection(var mActivity: MainActivity) {
 
             )
             rrData.lastTime = ecgData.time.get(lastPeakIndex)/1e9
-
-            val hr_bpm = 60.0 / rrData.average()
         }
     }
 

@@ -9,10 +9,8 @@ class ECGdata(private val maxItems: Int) {
         time.add(timestamp)
     }
 
-    fun size() : Int {
-        return volt.size()
-    }
+    fun size() = volt.size()
 
-    fun maxIndex(): Int = volt.maxIndex()
+    fun maxIndex() = volt.maxIndex()
 
 }

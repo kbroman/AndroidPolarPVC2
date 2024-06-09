@@ -29,7 +29,7 @@ class RunningAveSD(private val maxItems: Int)  {
         return if (list.isEmpty()) 0.0 else sum / list.size
     }
 
-    fun size(): Int = list.size
+    fun size() = list.size
 
     fun sd(): Double {
         val n = list.size
