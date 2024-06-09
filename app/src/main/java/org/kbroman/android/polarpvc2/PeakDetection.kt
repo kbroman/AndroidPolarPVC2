@@ -103,8 +103,9 @@ class PeakDetection(var mActivity: MainActivity) {
 
         // now look at whether penultimate peak was a PVC
         if (peakFound && peakIndexes.size() > INITIAL_PEAKS_TO_SKIP) {
-            val lastPeakIndex = peakIndexes.get(peakIndexes.maxIndex() - 2)
-            val thisPeakIndex = peakIndexes.get(peakIndexes.maxIndex() - 1)
+            val prevPeakIndex = peakIndexes.thirdLastValue()
+            val lastPeakIndex = peakIndexes.secondLastValue()
+            val thisPeakIndex = peakIndexes.lastValue()
 
             val temp_ecg = ArrayList<Double>()
 
@@ -127,8 +128,7 @@ class PeakDetection(var mActivity: MainActivity) {
 
             // get RR distance based on timestamps, in seconds
             rrData.add(
-                (ecgData.time.get(peakIndexes.get(peakIndexes.maxIndex() - 2)) -
-                        ecgData.time.get(peakIndexes.get(peakIndexes.maxIndex() - 3)) )*1e-9
+                (ecgData.time.get(lastPeakIndex) - ecgData.time.get(prevPeakIndex) )/1e9
 
             )
             rrData.lastTime = ecgData.time.get(lastPeakIndex)/1e9
