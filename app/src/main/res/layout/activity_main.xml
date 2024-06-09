@@ -16,7 +16,7 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.7">
+        android:layout_weight="0.85">
 
         <Switch
             android:id="@+id/connect_switch"
@@ -25,8 +25,8 @@
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
             android:text="@string/connect_text"
-            android:textSize="20sp"
             android:textColor="@color/black"
+            android:textSize="20sp"
             app:layout_constraintBaseline_toBaselineOf="@+id/record_switch"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -38,32 +38,9 @@
             android:layout_marginStart="25dp"
             android:layout_marginTop="20dp"
             android:text="@string/record_text"
-            android:textSize="20sp"
             android:textColor="@color/black"
+            android:textSize="20sp"
             app:layout_constraintStart_toEndOf="@+id/connect_switch"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/hr_textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="70dp"
-            android:text="HR"
-            android:textColor="@color/red"
-            android:textSize="30sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/pvc_textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="70dp"
-            android:text="PVC"
-            android:textColor="@color/blue"
-            android:textSize="30sp"
-            app:layout_constraintStart_toStartOf="@+id/record_switch"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -89,19 +66,42 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/device_textView" />
 
+        <TextView
+            android:id="@+id/hr_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="70dp"
+            android:text="HR"
+            android:textColor="@color/red"
+            android:textSize="30sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/pvc_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="70dp"
+            android:text="PVC"
+            android:textColor="@color/blue"
+            android:textSize="30sp"
+            app:layout_constraintStart_toStartOf="@+id/record_switch"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.androidplot.xy.XYPlot
-        style="@style/FullScreenGraph"
         android:id="@+id/ecgplot"
+        style="@style/FullScreenGraph"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         app:graphBackgroundColor="@color/grayA"
-        app:graphMarginBottom="10dp"
-        app:graphMarginLeft="10dp"
-        app:graphMarginRight="10dp"
-        app:graphMarginTop="10dp"
+        app:graphMarginBottom="0dp"
+        app:graphMarginLeft="0dp"
+        app:graphMarginRight="0dp"
+        app:graphMarginTop="0dp"
         app:gridBackgroundColor="@color/grayA"/>
 
     <com.androidplot.xy.XYPlot
@@ -112,8 +112,7 @@
         android:id="@+id/pvcplot"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        ap:rangeTitle="% PVC"/>
+        android:layout_weight="1"/>
 
     <com.androidplot.xy.XYPlot
         style="@style/FullScreenGraph"
@@ -123,7 +122,6 @@
         android:id="@+id/hrplot"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        ap:rangeTitle="HR (bpm)"/>
+        android:layout_weight="1"/>
 
 </LinearLayout>
