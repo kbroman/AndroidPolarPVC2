@@ -2,7 +2,6 @@ package org.kbroman.android.polarpvc2
 
 import android.graphics.Color
 import android.util.Log
-import com.androidplot.util.PixelUtils
 import com.androidplot.xy.BoundaryMode
 import com.androidplot.xy.LineAndPointFormatter
 import com.androidplot.xy.SimpleXYSeries
@@ -11,8 +10,6 @@ import com.androidplot.xy.XYGraphWidget
 import com.androidplot.xy.XYPlot
 import com.androidplot.xy.XYRegionFormatter
 import com.androidplot.xy.XYSeriesFormatter
-import java.text.FieldPosition
-import java.text.ParsePosition
 
 
 class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?) {

@@ -2,7 +2,6 @@ package org.kbroman.android.polarpvc2
 
 import android.graphics.Color
 import android.util.Log
-import com.androidplot.util.PixelUtils
 import com.androidplot.xy.BoundaryMode
 import com.androidplot.xy.LineAndPointFormatter
 import com.androidplot.xy.SimpleXYSeries
