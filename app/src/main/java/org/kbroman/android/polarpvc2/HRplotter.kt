@@ -10,6 +10,7 @@ import com.androidplot.xy.XYGraphWidget
 import com.androidplot.xy.XYPlot
 import com.androidplot.xy.XYRegionFormatter
 import com.androidplot.xy.XYSeriesFormatter
+import java.text.DecimalFormat
 
 
 class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?) {
@@ -46,6 +47,10 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
             // y-axis labels
             Plot!!.getGraph().setLineLabelEdges(
                 XYGraphWidget.Edge.LEFT) //  XYGraphWidget.Edge.BOTTOM
+
+            // round y-axis labels
+            val df = DecimalFormat("#")
+            Plot!!.getGraph().getLineLabelStyle(XYGraphWidget.Edge.LEFT).setFormat(df)
 
             update()
         } catch (ex: Exception) {

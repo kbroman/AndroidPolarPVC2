@@ -10,6 +10,7 @@ import com.androidplot.xy.XYGraphWidget
 import com.androidplot.xy.XYPlot
 import com.androidplot.xy.XYRegionFormatter
 import com.androidplot.xy.XYSeriesFormatter
+import java.text.DecimalFormat
 
 class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?) {
     private var yMax: Double = 40.0
@@ -33,6 +34,10 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
 
         Plot!!.getGraph().setLineLabelEdges(
             XYGraphWidget.Edge.LEFT) //  XYGraphWidget.Edge.BOTTOM
+
+        // round y-axis labels
+        val df = DecimalFormat("#")
+        Plot!!.getGraph().getLineLabelStyle(XYGraphWidget.Edge.LEFT).setFormat(df)
 
         Plot!!.addSeries(seriesPVC, formatterPVC)
         setupPlot()
