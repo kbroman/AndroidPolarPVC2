@@ -18,7 +18,6 @@ import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Date
 
-
 class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?) {
     private var yMin: Double = 60.0
     private var yMax: Double = 100.0
@@ -32,7 +31,6 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
 
     private var formatterHR: XYSeriesFormatter<XYRegionFormatter>? = null
     var seriesHR: SimpleXYSeries? = null
-
 
     init {
         formatterHR = LineAndPointFormatter(Color.rgb(0xFF , 0x41, 0x36), // red lines
@@ -102,7 +100,6 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
     }
 
 
-
     fun addValues(time: Double, hr: Double) {
         if (time != null && hr != null) {
             if (seriesHR!!.size() >= N_TOTAL_POINTS) {
@@ -125,7 +122,6 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
 
         Plot!!.setRangeBoundaries(yMin, yMax, BoundaryMode.FIXED)
     }
-
 
     fun update() {
         updateBoundaries()

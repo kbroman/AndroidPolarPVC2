@@ -31,7 +31,6 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
     private var formatterPVC: XYSeriesFormatter<XYRegionFormatter>? = null
     var seriesPVC: SimpleXYSeries? = null
 
-
     init {
         formatterPVC = LineAndPointFormatter(Color.rgb(0x00 , 0x74, 0xD9), // blue lines
             null, null, null)
@@ -97,8 +96,6 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
 
         return newPlotter
     }
-
-
 
     fun addValues(time: Double, pvc: Double) {
         if (time != null && pvc != null) {
