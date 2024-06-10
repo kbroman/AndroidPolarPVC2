@@ -15,6 +15,8 @@ import java.text.FieldPosition
 import java.text.Format
 import java.text.ParsePosition
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.util.Date
 
 class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?) {
     private var yMax: Double = 40.0
@@ -51,8 +53,10 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
                 toAppendTo: StringBuffer?,
                 pos: FieldPosition?
             ): StringBuffer {
-                var timestamp: Number = obj as? Number ?: 0.0
-                return formatter.format(timestamp, toAppendTo, pos)
+                var timestamp: Double = obj as? Double ?: 0.0
+                var timestamp_instant = Instant.ofEpochSecond(Math.round(timestamp))
+                var timestamp_date = Date.from(timestamp_instant)
+                return formatter.format(timestamp_date, toAppendTo, pos)
             }
 
             override fun parseObject(source: String, pos: ParsePosition): Object? {
