@@ -11,6 +11,10 @@ import com.androidplot.xy.XYPlot
 import com.androidplot.xy.XYRegionFormatter
 import com.androidplot.xy.XYSeriesFormatter
 import java.text.DecimalFormat
+import java.text.FieldPosition
+import java.text.Format
+import java.text.ParsePosition
+import java.text.SimpleDateFormat
 
 class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?) {
     private var yMax: Double = 40.0
@@ -32,11 +36,29 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
         formatterPVC!!.setLegendIconEnabled(false)
         seriesPVC = SimpleXYSeries("PVC")
 
-        Plot!!.getGraph().setLineLabelEdges(XYGraphWidget.Edge.LEFT) //  XYGraphWidget.Edge.BOTTOM
+        Plot!!.getGraph().setLineLabelEdges(XYGraphWidget.Edge.LEFT, XYGraphWidget.Edge.BOTTOM)
 
         // round y-axis labels
         val df = DecimalFormat("#")
         Plot!!.getGraph().getLineLabelStyle(XYGraphWidget.Edge.LEFT).setFormat(df)
+
+        // x-axis labels as times
+        Plot!!.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat( object : Format() {
+            private val formatter = SimpleDateFormat("HH:mm")
+
+            override fun format(
+                obj: Any?,
+                toAppendTo: StringBuffer?,
+                pos: FieldPosition?
+            ): StringBuffer {
+                var timestamp: Number = obj as? Number ?: 0.0
+                return formatter.format(timestamp, toAppendTo, pos)
+            }
+
+            override fun parseObject(source: String, pos: ParsePosition): Object? {
+                return null
+            }
+        })
 
         Plot!!.addSeries(seriesPVC, formatterPVC)
         setupPlot()

@@ -10,7 +10,13 @@ import com.androidplot.xy.XYGraphWidget
 import com.androidplot.xy.XYPlot
 import com.androidplot.xy.XYRegionFormatter
 import com.androidplot.xy.XYSeriesFormatter
+import java.text.DateFormat
 import java.text.DecimalFormat
+import java.text.FieldPosition
+import java.text.Format
+import java.text.ParsePosition
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 
 
 class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?) {
@@ -45,12 +51,29 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
             Plot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 60.0)
 
             // y-axis labels
-            Plot!!.getGraph().setLineLabelEdges(
-                XYGraphWidget.Edge.LEFT) //  XYGraphWidget.Edge.BOTTOM
+            Plot!!.getGraph().setLineLabelEdges(XYGraphWidget.Edge.LEFT, XYGraphWidget.Edge.BOTTOM)
 
             // round y-axis labels
             val df = DecimalFormat("#")
             Plot!!.getGraph().getLineLabelStyle(XYGraphWidget.Edge.LEFT).setFormat(df)
+
+            // x-axis labels as times
+            Plot!!.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat( object : Format() {
+                private val formatter = SimpleDateFormat("HH:mm")
+
+                override fun format(
+                    obj: Any?,
+                    toAppendTo: StringBuffer?,
+                    pos: FieldPosition?
+                ): StringBuffer {
+                    var timestamp: Number = obj as? Number ?: 0.0
+                    return formatter.format(timestamp, toAppendTo, pos)
+                }
+
+                override fun parseObject(source: String, pos: ParsePosition): Object? {
+                    return null
+                }
+            })
 
             update()
         } catch (ex: Exception) {
