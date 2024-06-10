@@ -32,8 +32,7 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
         formatterPVC!!.setLegendIconEnabled(false)
         seriesPVC = SimpleXYSeries("PVC")
 
-        Plot!!.getGraph().setLineLabelEdges(
-            XYGraphWidget.Edge.LEFT) //  XYGraphWidget.Edge.BOTTOM
+        Plot!!.getGraph().setLineLabelEdges(XYGraphWidget.Edge.LEFT) //  XYGraphWidget.Edge.BOTTOM
 
         // round y-axis labels
         val df = DecimalFormat("#")
@@ -46,7 +45,7 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
     fun setupPlot() {
         try {
             // frequency of x- and y-axis lines
-            Plot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 60*15.0)
+            Plot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, 60.0)
             Plot!!.setRangeStep(StepMode.INCREMENT_BY_VAL, 10.0)
 
             update()
@@ -92,6 +91,7 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
 
     fun updateBoundaries() {
         Plot!!.setDomainBoundaries(xMin, xMax, BoundaryMode.FIXED)
+        Plot!!.setDomainStep(StepMode.INCREMENT_BY_VAL, domainLines())
 
         Plot!!.setRangeBoundaries(0.0, yMax, BoundaryMode.FIXED)
     }
@@ -104,5 +104,17 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
     fun clear() {
         seriesPVC!!.clear()
         update()
+    }
+
+    fun domainLines(): Double {
+        val timespan_min = (xMax - xMin)/60.0
+
+        return when {  // returns time in seconds
+            timespan_min <= 5.0  -> 60.0
+            timespan_min <= 20.0 -> 300.0
+            timespan_min <= 120.0 -> 900.0
+            timespan_min <= 480.0 -> 1800.0
+            else -> 3600.0
+        }
     }
 }
