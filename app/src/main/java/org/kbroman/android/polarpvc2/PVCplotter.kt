@@ -133,18 +133,18 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
         val timespan_min = (xMax - xMin)/60.0
 
         return when {  // returns time in seconds
-            timespan_min <= 6.0  -> 60.0
-            timespan_min <= 12.0 -> 120.0
-            timespan_min <= 30.0 -> 300.0
-            timespan_min <= 60.0 -> 600.0
-            timespan_min <= 90.0 -> 900.0
-            timespan_min <= 120.0 -> 1200.0
-            timespan_min <= 180.0 -> 1800.0
-            timespan_min <= 360.0 -> 3600.0
-            timespan_min <= 480.0 -> 4800.0
-            timespan_min <= 720.0 -> 7200.0
-            timespan_min <= 1080.0 -> 10800.0
-            timespan_min <= 1440.0 -> 14400.0
+            timespan_min < 7.0  -> 60.0
+            timespan_min < 14.0 -> 120.0
+            timespan_min < 35.0 -> 300.0
+            timespan_min < 70.0 -> 600.0
+            timespan_min < 105.0 -> 900.0
+            timespan_min < 140.0 -> 1200.0
+            timespan_min < 210.0 -> 1800.0
+            timespan_min < 420.0 -> 3600.0
+            timespan_min < 560.0 -> 4800.0
+            timespan_min < 840.0 -> 7200.0
+            timespan_min < 1260.0 -> 10800.0
+            timespan_min < 1680.0 -> 14400.0
             else -> 21600.0
         }
     }
