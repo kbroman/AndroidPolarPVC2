@@ -138,11 +138,14 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
         val timespan_min = (xMax - xMin)/60.0
 
         return when {  // returns time in seconds
-            timespan_min <= 5.0  -> 60.0
-            timespan_min <= 20.0 -> 300.0
+            timespan_min <= 10.0  -> 60.0
+            timespan_min <= 30.0 -> 300.0
             timespan_min <= 120.0 -> 900.0
-            timespan_min <= 480.0 -> 1800.0
-            else -> 3600.0
+            timespan_min <= 180.0 -> 1800.0
+            timespan_min <= 480.0 -> 3600.0
+            timespan_min <= 720.0 -> 7200.0
+            timespan_min <= 1440.0 -> 10800.0
+            else -> 21600.0
         }
     }
 }
