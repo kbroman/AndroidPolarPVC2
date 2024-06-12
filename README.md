@@ -1,6 +1,4 @@
-# PolarPVC2
-
-![PolarPVC2 app icon with red background and an ECG trace in white of three heart beats with middle one being a PVC](app_icon.png)
+# PolarPVC2 <img src="app_icon.png" align="right" alt="PolarPVC2 app logo with red background and an ECG trace in white of three heart beats with middle one being a PVC"/>
 
 [![zenodo DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11626183.svg)](https://doi.org/10.5281/zenodo.11626183)
 
