@@ -139,6 +139,7 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
 
         return when {  // returns time in seconds
             timespan_min <= 10.0  -> 60.0
+            timespan_min <= 12.0 -> 120.0
             timespan_min <= 30.0 -> 300.0
             timespan_min <= 120.0 -> 900.0
             timespan_min <= 180.0 -> 1800.0
