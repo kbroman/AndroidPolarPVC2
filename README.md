@@ -1,8 +1,8 @@
 # PolarPVC2
 
-[![zenodo DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11626183.svg)](https://doi.org/10.5281/zenodo.11626183)
-
 ![PolarPVC2 app icon with red background and an ECG trace in white of three heart beats with middle one being a PVC](app_icon.png)
+
+[![zenodo DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11626183.svg)](https://doi.org/10.5281/zenodo.11626183)
 
 This is an Android app to get ECG data from a [Polar H10 chest-strap
 heart rate
