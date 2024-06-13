@@ -119,14 +119,15 @@
         app:graphMarginBottom="5dp"
         app:graphMarginLeft="17dp"
         app:graphMarginTop="15dp"
-        app:graphMarginRight="1dp"
+        app:graphMarginRight="0dp"
         app:lineLabelAlignBottom="center"
         app:lineLabelRotationBottom="0.0"
         app:lineLabelInsetBottom="2dp"
         app:rangeTitleTextSize="20dp"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        app:renderMode="use_background_thread"/>
 
     <com.androidplot.xy.XYPlot
         android:id="@+id/hrplot"
@@ -142,14 +143,15 @@
         app:graphMarginBottom="5dp"
         app:graphMarginLeft="17dp"
         app:graphMarginTop="15dp"
-        app:graphMarginRight="1dp"
+        app:graphMarginRight="0dp"
         app:lineLabelAlignBottom="center"
         app:lineLabelRotationBottom="0.0"
         app:lineLabelInsetBottom="2dp"
         app:rangeTitleTextSize="20dp"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        app:renderMode="use_background_thread"/>
 
     <TextView
         android:id="@+id/bottom_padding"
