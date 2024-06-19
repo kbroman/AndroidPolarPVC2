@@ -244,7 +244,7 @@ class MainActivity : AppCompatActivity() {
 
     public override fun onResume() {
         super.onResume()
-        api.foregroundEntered()
+        if(api != null) api.foregroundEntered()
 
         if (ecgPlotter == null) {
             ECGplot!!.post({
