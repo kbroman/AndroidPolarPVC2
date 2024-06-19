@@ -45,7 +45,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "PolarPVC2main"
         private const val PERMISSION_REQUEST_CODE = 1
-        private const val RR_TO_HR_FACTOR: Double = 1.0e9 / 7682304.0 * 60
     }
 
     private val api: PolarBleApi by lazy {
