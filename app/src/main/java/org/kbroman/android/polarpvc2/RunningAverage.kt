@@ -24,4 +24,10 @@ class RunningAverage(private val maxItems: Int) {
     }
 
     fun size() = list.size
+
+    fun clear() {
+        list.clear()
+        sum = 0.0
+        lastTime = -1.0
+    }
 }

@@ -266,6 +266,7 @@ class MainActivity : AppCompatActivity() {
         wd.closeFile()
         binding.connectSwitch.isChecked = false
         binding.recordSwitch.isChecked = false
+        pd.clear()  // clear HR and RR running average data
     }
 
     private fun showToast(message: String) {

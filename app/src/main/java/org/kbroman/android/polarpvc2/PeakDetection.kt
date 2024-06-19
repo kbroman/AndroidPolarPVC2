@@ -172,4 +172,9 @@ class PeakDetection(var mActivity: MainActivity) {
 
         return (min_index)
     }
+
+    fun clear() {
+        pvcData.clear()
+        rrData.clear()
+    }
 }
