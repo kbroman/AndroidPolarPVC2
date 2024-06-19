@@ -14,7 +14,7 @@ class PeakDetection(var mActivity: MainActivity) {
         private const val N_PEAKS_FOR_RR_AVE = 25
         private const val N_PEAKS_FOR_PVC_AVE = 100
         private const val PVC_RS_DIST: Double = 5.0
-        private const val INITIAL_PEAKS_TO_SKIP = 2
+        private const val INITIAL_PEAKS_TO_SKIP = 4
         private const val INITIAL_ECG_TO_SKIP = 500
         private const val MIN_PEAK_VALUE: Double = 1.5
         private const val HR_200_INTERVAL: Int = 39  // = (60.0/200.0*130)
@@ -176,5 +176,8 @@ class PeakDetection(var mActivity: MainActivity) {
     fun clear() {
         pvcData.clear()
         rrData.clear()
+        peakIndexes.clear()
+        lastPeakIndex = -1
+        thisPeakIndex = -1
     }
 }

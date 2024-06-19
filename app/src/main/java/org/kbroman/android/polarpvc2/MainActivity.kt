@@ -165,8 +165,6 @@ class MainActivity : AppCompatActivity() {
 
                 api.connectToDevice(deviceId)
 
-
-
             } else { // close connection
                 Log.i(TAG, "Closing connection")
 
@@ -182,6 +180,7 @@ class MainActivity : AppCompatActivity() {
                 ecgDisposable?.dispose()
 
                 api.disconnectFromDevice(deviceId)
+                pd.clear() // reset HR and RR running averages
                 binding.deviceTextView.text = ""
                 binding.batteryTextView.text = ""
             }

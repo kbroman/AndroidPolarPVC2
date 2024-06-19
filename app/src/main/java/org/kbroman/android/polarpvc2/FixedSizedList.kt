@@ -37,4 +37,9 @@ class FixedSizedList<T>(private val maxItems: Int) {
     fun secondLastValue() = get(maxIndex()-2)
 
     fun thirdLastValue() = get(maxIndex()-3)
+
+    fun clear() {
+        list.clear()
+        offset=0
+    }
 }
