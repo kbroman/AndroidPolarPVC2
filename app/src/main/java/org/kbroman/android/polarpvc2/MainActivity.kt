@@ -264,6 +264,8 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         api.shutDown()
         wd.closeFile()
+        binding.connectSwitch.isChecked = false
+        binding.recordSwitch.isChecked = false
     }
 
     private fun showToast(message: String) {
