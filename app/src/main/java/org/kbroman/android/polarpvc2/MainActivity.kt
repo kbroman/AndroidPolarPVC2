@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
@@ -79,6 +80,7 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)  // try to keep screen on
 
         ECGplot = findViewById(R.id.ecgplot)
         HRplot = findViewById(R.id.hrplot)
