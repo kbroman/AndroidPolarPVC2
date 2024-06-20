@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
     private var PVCplot: XYPlot? = null
 
     companion object {
-        private const val TAG = "PolarPVC2main"
+        private const val TAG = "PolarPVC2app_main"
         private const val PERMISSION_REQUEST_CODE = 1
     }
 

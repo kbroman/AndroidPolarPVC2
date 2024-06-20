@@ -25,7 +25,7 @@ class HRplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?
     private var xMax: Double = -Double.MAX_VALUE
 
     companion object {
-        private const val TAG = "PolarPVC2plotpvc"
+        private const val TAG = "PolarPVC2app_plothr"
         private const val N_TOTAL_POINTS: Int = 150*60*24*7   // maximum number of data points
     }
 

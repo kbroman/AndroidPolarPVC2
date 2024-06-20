@@ -18,7 +18,7 @@ class WriteData(activity: MainActivity) {
     private var fileWriter: PrintWriter? = null
 
     companion object {
-        private const val TAG = "PolarPVC2write"
+        private const val TAG = "PolarPVC2app_write"
         private const val HOUR_IN_MILLI = 1000*60*60
     }
 

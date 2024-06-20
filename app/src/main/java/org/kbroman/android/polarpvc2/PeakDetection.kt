@@ -10,7 +10,7 @@ import kotlin.math.round
 class PeakDetection(var mActivity: MainActivity) {
 
     companion object {
-        private const val TAG = "PolarPVC2peaks"
+        private const val TAG = "PolarPVC2app_peaks"
         private const val N_ECG_VALS: Int = 130*60*5
         private const val N_PEAKS: Int = 150*5
         private const val N_PEAKS_FOR_RR_AVE = 25
