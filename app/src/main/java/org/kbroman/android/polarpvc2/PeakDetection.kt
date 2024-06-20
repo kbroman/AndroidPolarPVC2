@@ -22,8 +22,7 @@ class PeakDetection(var mActivity: MainActivity) {
         private const val MIN_PEAK_VALUE: Double = 1.5
         private const val HR_200_INTERVAL: Int = 39  // = (60.0/200.0*130)
         private const val MAX_RR_SEC: Double = 60.0/35.0
-        private const val MOVING_AVESD_WINDOW_SMSQDIFF: Int = 500
-        private const val MOVING_AVE_WINDOW_ECG: Int = 130
+        private const val MOVING_AVESD_WINDOW: Int = 500
         const val TIMESTAMP_OFFSET: Long = 946684800000000000
         // for time offset, see https://github.com/polarofficial/polar-ble-sdk/blob/master/documentation/TimeSystemExplained.md
     }
@@ -32,8 +31,7 @@ class PeakDetection(var mActivity: MainActivity) {
     var pvcData: RunningAverage = RunningAverage(N_PEAKS_FOR_PVC_AVE)
     var rrData: RunningAverage = RunningAverage(N_PEAKS_FOR_RR_AVE)
     private var peakIndexes = FixedSizedList<Int>(N_PEAKS)
-    private var movingAveECG = RunningAverage(MOVING_AVE_WINDOW_ECG)
-    private var movingAveSDsmsqdiff = RunningAveSD(MOVING_AVESD_WINDOW_SMSQDIFF)
+    private var movingAveSDsmsqdiff = RunningAveSD(MOVING_AVESD_WINDOW)
     private var last_smsqdiff: Double = -Double.MAX_VALUE
     private var smsqdiff = ArrayList<Double>()
     private var lastPeakIndex: Int = -1
@@ -71,7 +69,6 @@ class PeakDetection(var mActivity: MainActivity) {
         for (i in start until end - 1) {
             val diff: Double = (ecgData.volt.get(i) - ecgData.volt.get(i + 1))
             smsqdiff.add(diff * diff)
-            movingAveECG.add(ecgData.volt.get(i)) // keeping moving average of ECG to help detect PVC
         }
         smsqdiff.add(0.0)
         smsqdiff.add(0.0)
@@ -121,7 +118,7 @@ class PeakDetection(var mActivity: MainActivity) {
 
             for (i in 1 until endSearch) temp_ecg.add(ecgData.volt.get(lastPeakIndex + i))
             val minPeakIndex = which_min(temp_ecg)  // compare to PVC_RS_DIST
-            val pvcTestStat = calcPVCTestStat(temp_ecg, movingAveECG.average()) // compare to PVC_TEST_STAT_THRESH
+            val pvcTestStat = calcPVCTestStat(temp_ecg) // compare to PVC_TEST_STAT_THRESH
             Log.d(TAG, "minPeakIndex: $minPeakIndex   pvcTestStat: ${myround(pvcTestStat, 4)}")
 
             if (pvcTestStat > PVC_TEST_STAT_THRESH) { // looks like a PVC
@@ -186,12 +183,27 @@ class PeakDetection(var mActivity: MainActivity) {
     }
 
     // test statistic for determining PVC
-    //    as proportion of values from peak to half-way to next peak that are below mean
-    private fun calcPVCTestStat(v: ArrayList<Double>, mean: Double): Double {
+    //    as proportion of values (from peak to half-way to next peak) that are below
+    //    the mid-point of the range of those values
+    private fun calcPVCTestStat(v: ArrayList<Double>): Double {
         var n = v.size
         var count: Int = 0
+
+        if(n==0) return(0.0)
+
+        var min = v[0]
+        var max = v[0]
+
+        for(vv in v) {
+            if(vv < min) min = vv
+            if(vv > max) max = vv
+        }
+
+        var mid_range = (max + min)/2.0
+
+
         for (vv in v) {
-            if(vv < mean) count++
+            if(vv < mid_range) count++
         }
         return count.toDouble() / n.toDouble()
     }
