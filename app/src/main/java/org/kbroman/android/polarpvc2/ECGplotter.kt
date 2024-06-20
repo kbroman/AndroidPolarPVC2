@@ -13,6 +13,7 @@ import com.androidplot.xy.XYSeriesFormatter
 
 class ECGplotter (private var mActivity: MainActivity?, private var Plot: XYPlot?) {
     private var nData: Int = 0
+    var updatePlot = false
     companion object {
         private const val TAG = "PolarPVC2plot"
         private const val SEC_TO_PLOT: Double = 10.0   // Show this many seconds
@@ -64,9 +65,6 @@ class ECGplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
             Plot!!.setRangeStep(StepMode.INCREMENT_BY_VAL, 0.5)
             Plot!!.setUserRangeOrigin(0.0)
 
-            // domain (x-axis)
-            updateDomainBoundaries()
-
             update()
         } catch (ex: Exception) {
             Log.e(TAG, "Problem setting up plot")
@@ -112,8 +110,6 @@ class ECGplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
             nData++
         }
 
-        // Reset the domain boundaries
-        updateDomainBoundaries()
         update()
     }
 
@@ -159,8 +155,10 @@ class ECGplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
     }
 
     fun update() {
-        if (nData % 73 == 0) {
+        if (updatePlot) {
+            updateDomainBoundaries()
             mActivity!!.runOnUiThread { Plot!!.redraw() }
+            updatePlot = false
         }
     }
 

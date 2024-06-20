@@ -49,6 +49,8 @@ class PeakDetection(var mActivity: MainActivity) {
             ecgData.add(timestamp, voltage)
             mActivity.ecgPlotter!!.addValues(timestamp/1e9, voltage)
         }
+        mActivity.ecgPlotter!!.updatePlot = true
+        mActivity.ecgPlotter!!.update()
         val n = ecgData.maxIndex() - start
 
         if (ecgData.maxIndex() < INITIAL_ECG_TO_SKIP) return  // wait to start looking for peaks
