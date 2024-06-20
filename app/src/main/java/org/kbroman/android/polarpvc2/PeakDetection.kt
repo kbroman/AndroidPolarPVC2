@@ -21,6 +21,7 @@ class PeakDetection(var mActivity: MainActivity) {
         private const val INITIAL_ECG_TO_SKIP = 500
         private const val MIN_PEAK_VALUE: Double = 1.5
         private const val HR_200_INTERVAL: Int = 39  // = (60.0/200.0*130)
+        private const val MAX_RR_SEC: Double = 60.0/35.0
         private const val MOVING_AVESD_WINDOW_SMSQDIFF: Int = 500
         private const val MOVING_AVE_WINDOW_ECG: Int = 130
         const val TIMESTAMP_OFFSET: Long = 946684800000000000
@@ -135,11 +136,13 @@ class PeakDetection(var mActivity: MainActivity) {
             }
 
             // get RR distance based on timestamps, in seconds
-            rrData.add(
-                (ecgData.time.get(lastPeakIndex) - ecgData.time.get(prevPeakIndex) )/1e9
-
-            )
-            rrData.lastTime = ecgData.time.get(lastPeakIndex)/1e9
+            val rr: Double = (ecgData.time.get(lastPeakIndex) - ecgData.time.get(prevPeakIndex) )/1e9
+            if(rr < MAX_RR_SEC) {
+                rrData.add(rr)
+                rrData.lastTime = ecgData.time.get(lastPeakIndex) / 1e9
+            } else {
+                Log.d(TAG, "Ignoring RR = ${myround(rr, 2)} sec")
+            }
         }
     }
 
