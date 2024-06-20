@@ -14,6 +14,7 @@ class PeakDetection(var mActivity: MainActivity) {
         private const val N_PEAKS_FOR_RR_AVE = 25
         private const val N_PEAKS_FOR_PVC_AVE = 100
         private const val PVC_RS_DIST: Double = 5.0
+        private const val PVC_TEST_STAT_THRESH: Double = 0.7
         private const val INITIAL_PEAKS_TO_SKIP = 4
         private const val INITIAL_ECG_TO_SKIP = 500
         private const val MIN_PEAK_VALUE: Double = 1.5
@@ -27,7 +28,8 @@ class PeakDetection(var mActivity: MainActivity) {
     var pvcData: RunningAverage = RunningAverage(N_PEAKS_FOR_PVC_AVE)
     var rrData: RunningAverage = RunningAverage(N_PEAKS_FOR_RR_AVE)
     private var peakIndexes = FixedSizedList<Int>(N_PEAKS)
-    private var movingAveSDecg = RunningAveSD(MOVING_AVESD_WINDOW)
+    private var movingAveECG = RunningAverage(MOVING_AVESD_WINDOW)
+    private var movingAveSDsmsqdiff = RunningAveSD(MOVING_AVESD_WINDOW)
     private var last_smsqdiff: Double = -Double.MAX_VALUE
     private var smsqdiff = ArrayList<Double>()
     private var lastPeakIndex: Int = -1
@@ -65,6 +67,7 @@ class PeakDetection(var mActivity: MainActivity) {
         for (i in start until end - 1) {
             val diff: Double = (ecgData.volt.get(i) - ecgData.volt.get(i + 1))
             smsqdiff.add(diff * diff)
+            movingAveECG.add(ecgData.volt.get(i)) // keeping moving average of ECG to help detect PVC
         }
         smsqdiff.add(0.0)
         smsqdiff.add(0.0)
@@ -73,7 +76,7 @@ class PeakDetection(var mActivity: MainActivity) {
         for (i in 0 until smsqdiff.size - 2) {
             smsqdiff[i] = (smsqdiff[i] + smsqdiff[i + 1] + smsqdiff[i + 2]) / 3.0
 
-            movingAveSDecg.add(smsqdiff[i]) // get running mean and SD
+            movingAveSDsmsqdiff.add(smsqdiff[i]) // get running mean and SD
         }
 
         // find maximum
@@ -83,7 +86,7 @@ class PeakDetection(var mActivity: MainActivity) {
 
         var peakFound = false
 
-        if ((this_smsqdiff - movingAveSDecg.average()) / movingAveSDecg.sd() >= MIN_PEAK_VALUE) { // peak only if large
+        if ((this_smsqdiff - movingAveSDsmsqdiff.average()) / movingAveSDsmsqdiff.sd() >= MIN_PEAK_VALUE) { // peak only if large
             if (peakIndexes.size() == 0 || thisPeakIndex - lastPeakIndex >= HR_200_INTERVAL) { // new peak
                 peakFound = true
                 last_smsqdiff = this_smsqdiff
@@ -113,9 +116,11 @@ class PeakDetection(var mActivity: MainActivity) {
                 min((thisPeakIndex - lastPeakIndex).toDouble() / 2.0, 20.0).toInt()
 
             for (i in 1 until endSearch) temp_ecg.add(ecgData.volt.get(lastPeakIndex + i))
-            val minPeakIndex = which_min(temp_ecg)
+            val minPeakIndex = which_min(temp_ecg)  // compare to PVC_RS_DIST
+            val pvcTestStat = calcPVCTestStat(temp_ecg, movingAveECG.average()) // compare to PVC_TEST_STAT_THRESH
+            Log.i(TAG, "minPeakIndex: $minPeakIndex   pvcTestStat: $pvcTestStat")
 
-            if (minPeakIndex >= PVC_RS_DIST) { // looks like a PVC
+            if (pvcTestStat > PVC_TEST_STAT_THRESH) { // looks like a PVC
                 pvcData.add(1.0)
                 pvcData.lastTime = ecgData.time.get(lastPeakIndex)/1e9
                 Log.wtf(TAG, "*** PVC ***")
@@ -134,6 +139,7 @@ class PeakDetection(var mActivity: MainActivity) {
             rrData.lastTime = ecgData.time.get(lastPeakIndex)/1e9
         }
     }
+
 
     private fun which_max(v: ArrayList<Double>): Int {
         if (v.isEmpty()) return (-1)
@@ -171,6 +177,17 @@ class PeakDetection(var mActivity: MainActivity) {
         }
 
         return (min_index)
+    }
+
+    // test statistic for determining PVC
+    //    as proportion of values from peak to half-way to next peak that are below mean
+    private fun calcPVCTestStat(v: ArrayList<Double>, mean: Double): Double {
+        var n = v.size
+        var count: Int = 0
+        for (vv in v) {
+            if(vv < mean) count++
+        }
+        return count.toDouble() / n.toDouble()
     }
 
     fun clear() {
