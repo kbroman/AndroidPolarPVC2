@@ -28,6 +28,8 @@ import java.util.Calendar
 import java.util.Date
 import java.util.TimeZone
 import java.util.UUID
+import kotlin.math.pow
+import kotlin.math.round
 
 
 private lateinit var binding: ActivityMainBinding
@@ -89,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         api.setPolarFilter(false)
         api.setApiCallback(object : PolarBleApiCallback() {
             override fun blePowerStateChanged(powered: Boolean) {
-                Log.i(TAG, "BLE power: $powered")
+                Log.d(TAG, "BLE power: $powered")
                 bluetoothEnabled = powered
                 if (powered) {
                     showToast("Phone Bluetooth on")
@@ -99,7 +101,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun deviceConnected(polarDeviceInfo: PolarDeviceInfo) {
-                Log.i(TAG, "Connected: ${polarDeviceInfo.deviceId}")
+                Log.d(TAG, "Connected: ${polarDeviceInfo.deviceId}")
                 deviceId = polarDeviceInfo.deviceId
                 deviceConnected = true
                 binding.connectSwitch.isChecked = true
@@ -108,11 +110,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun deviceConnecting(polarDeviceInfo: PolarDeviceInfo) {
-                Log.i(TAG, "Connecting: ${polarDeviceInfo.deviceId}")
+                Log.d(TAG, "Connecting: ${polarDeviceInfo.deviceId}")
             }
 
             override fun deviceDisconnected(polarDeviceInfo: PolarDeviceInfo) {
-                Log.i(TAG, "Disconnected: ${polarDeviceInfo.deviceId}")
+                Log.d(TAG, "Disconnected: ${polarDeviceInfo.deviceId}")
                 deviceConnected = false
                 binding.connectSwitch.isChecked = false
                 binding.deviceTextView.text = ""
@@ -124,7 +126,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun batteryLevelReceived(identifier: String, level: Int) {
-                Log.i(TAG, "Battery Level: $level")
+                Log.d(TAG, "Battery Level: $level")
                 binding.batteryTextView.text = "Battery level $level"
 
 
@@ -160,7 +162,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.connectSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) { // open connection
-                Log.i(TAG, "Opening connection")
+                Log.d(TAG, "Opening connection")
 
                 binding.deviceTextView.text = "Connecting..."
                 binding.batteryTextView.text = "Battery level..."
@@ -168,10 +170,10 @@ class MainActivity : AppCompatActivity() {
                 api.connectToDevice(deviceId)
 
             } else { // close connection
-                Log.i(TAG, "Closing connection")
+                Log.d(TAG, "Closing connection")
 
                 if(binding.recordSwitch.isChecked) {
-                    Log.i(TAG, "currently recording")
+                    Log.d(TAG, "currently recording")
 
                     // FIX_ME: should open a dialog box to verify you want to stop recording
                     // (maybe always verify stopping recording)
@@ -190,10 +192,10 @@ class MainActivity : AppCompatActivity() {
 
         binding.recordSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) { // start recording
-                Log.i(TAG, "Starting recording")
+                Log.d(TAG, "Starting recording")
 
                 if(!binding.connectSwitch.isChecked) {
-                    Log.i(TAG, "not yet connected")
+                    Log.d(TAG, "not yet connected")
                     binding.connectSwitch.isChecked = true   // this will call open_connection()
                 }
                 isRecording = true
@@ -202,7 +204,7 @@ class MainActivity : AppCompatActivity() {
                 filePath = prefs.getString("PREF_FILE_PATH", "")
                 if(filePath == "") chooseDataDirectory()
             } else { // stop recording
-                Log.i(TAG, "Stopping recording")
+                Log.d(TAG, "Stopping recording")
                 isRecording = false
                 wd.closeFile()
             }
@@ -284,7 +286,7 @@ class MainActivity : AppCompatActivity() {
             if (result.resultCode == RESULT_OK) {
                 // Get Uri from Storage Access Framework.
                 var uri = result.data!!.data
-                Log.i(TAG, "got a filePath: $uri")
+                Log.d(TAG, "got a filePath: $uri")
 
                 // save to preferences
                 val editor = getPreferences(MODE_PRIVATE).edit()
@@ -326,18 +328,18 @@ class MainActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     { polarEcgData: PolarEcgData ->
-                        Log.i(TAG, "ecg update")
+                        Log.d(TAG, "ecg update")
 
                         pd.processData(polarEcgData)  // PeakDetection -> find_peaks
                         if(isRecording && filePath != "") {
-                            Log.i(TAG, "writing data")
+                            Log.d(TAG, "writing data")
                             wd.writeData(filePath!!, polarEcgData)
                         }
 
                         if(pd.rrData.size() > 1) {
                             val hr_bpm: Double = 60.0 / pd.rrData.average()
                             val pvc_ave: Double = pd.pvcData.average() * 100.0
-                            Log.i(TAG, "pvc = ${pvc_ave}   hr=${hr_bpm}")
+                            Log.d(TAG, "pvc = ${myround(pvc_ave, 0)}   hr=${myround(hr_bpm, 1)}")
                             binding.pvcTextView.text = "${Math.round(pvc_ave)}% pvc"
                             binding.hrTextView.text = "${Math.round(hr_bpm)} bpm"
 
@@ -354,7 +356,7 @@ class MainActivity : AppCompatActivity() {
                         ecgDisposable = null
                     },
                     {
-                        Log.i(TAG, "Ecg stream complete")
+                        Log.d(TAG, "Ecg stream complete")
                     }
                 )
         } else {
@@ -362,5 +364,17 @@ class MainActivity : AppCompatActivity() {
             ecgDisposable?.dispose()
             ecgDisposable = null
         }
+    }
+}
+
+fun myround(value: Double, digits: Int): String {
+    val tens: Double = if(digits < 0) 10.0.pow(-digits) else 10.0.pow(digits)
+
+    if(digits == 0) {
+        return round(value).toInt().toString()
+    } else if(digits < 0) {
+        return (round(value/tens) *tens).toInt().toString()
+    } else {
+        return (round(value*tens) /tens).toString()
     }
 }

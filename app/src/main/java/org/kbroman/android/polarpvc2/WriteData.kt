@@ -44,7 +44,7 @@ class WriteData(activity: MainActivity) {
 
     private fun openFile(filePath: String)
     {
-        Log.i(TAG, "Opening file")
+        Log.d(TAG, "Opening file")
 
         val fileName = getFileName()
 
@@ -58,7 +58,7 @@ class WriteData(activity: MainActivity) {
         fileWriter = PrintWriter(writer)
 
         timeFileOpened = Instant.now().toEpochMilli()
-        Log.i(TAG, "opened file $docUri")
+        Log.d(TAG, "opened file $docUri")
         fileWriter?.write("time,ecg\n")
     }
 
@@ -72,11 +72,11 @@ class WriteData(activity: MainActivity) {
 
     fun closeFile() {
         if(fileWriter != null) {
-            Log.i(TAG, "Flushing file")
+            Log.d(TAG, "Flushing file")
             fileWriter!!.flush()
         }
         if(filePointer != null) {
-            Log.i(TAG, "Closing file")
+            Log.d(TAG, "Closing file")
             filePointer!!.close()
         }
     }

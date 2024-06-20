@@ -4,6 +4,8 @@ import android.util.Log
 import com.polar.sdk.api.model.PolarEcgData
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.pow
+import kotlin.math.round
 
 class PeakDetection(var mActivity: MainActivity) {
 
@@ -14,12 +16,13 @@ class PeakDetection(var mActivity: MainActivity) {
         private const val N_PEAKS_FOR_RR_AVE = 25
         private const val N_PEAKS_FOR_PVC_AVE = 100
         private const val PVC_RS_DIST: Double = 5.0
-        private const val PVC_TEST_STAT_THRESH: Double = 0.7
+        private const val PVC_TEST_STAT_THRESH: Double = 0.78
         private const val INITIAL_PEAKS_TO_SKIP = 4
         private const val INITIAL_ECG_TO_SKIP = 500
         private const val MIN_PEAK_VALUE: Double = 1.5
         private const val HR_200_INTERVAL: Int = 39  // = (60.0/200.0*130)
-        private const val MOVING_AVESD_WINDOW: Int = 500
+        private const val MOVING_AVESD_WINDOW_SMSQDIFF: Int = 500
+        private const val MOVING_AVE_WINDOW_ECG: Int = 130
         const val TIMESTAMP_OFFSET: Long = 946684800000000000
         // for time offset, see https://github.com/polarofficial/polar-ble-sdk/blob/master/documentation/TimeSystemExplained.md
     }
@@ -28,8 +31,8 @@ class PeakDetection(var mActivity: MainActivity) {
     var pvcData: RunningAverage = RunningAverage(N_PEAKS_FOR_PVC_AVE)
     var rrData: RunningAverage = RunningAverage(N_PEAKS_FOR_RR_AVE)
     private var peakIndexes = FixedSizedList<Int>(N_PEAKS)
-    private var movingAveECG = RunningAverage(MOVING_AVESD_WINDOW)
-    private var movingAveSDsmsqdiff = RunningAveSD(MOVING_AVESD_WINDOW)
+    private var movingAveECG = RunningAverage(MOVING_AVE_WINDOW_ECG)
+    private var movingAveSDsmsqdiff = RunningAveSD(MOVING_AVESD_WINDOW_SMSQDIFF)
     private var last_smsqdiff: Double = -Double.MAX_VALUE
     private var smsqdiff = ArrayList<Double>()
     private var lastPeakIndex: Int = -1
@@ -99,7 +102,7 @@ class PeakDetection(var mActivity: MainActivity) {
                     lastPeakIndex = thisPeakIndex
                     peakIndexes.setLast(thisPeakIndex)
                     mActivity.ecgPlotter!!.replaceLastPeakValue(ecgData.time.get(thisPeakIndex)/1e9, ecgData.volt.get(thisPeakIndex))
-                    Log.i(TAG,"adjusted peak")
+                    Log.d(TAG,"adjusted peak")
                 }
             }
         }
@@ -118,7 +121,7 @@ class PeakDetection(var mActivity: MainActivity) {
             for (i in 1 until endSearch) temp_ecg.add(ecgData.volt.get(lastPeakIndex + i))
             val minPeakIndex = which_min(temp_ecg)  // compare to PVC_RS_DIST
             val pvcTestStat = calcPVCTestStat(temp_ecg, movingAveECG.average()) // compare to PVC_TEST_STAT_THRESH
-            Log.i(TAG, "minPeakIndex: $minPeakIndex   pvcTestStat: $pvcTestStat")
+            Log.d(TAG, "minPeakIndex: $minPeakIndex   pvcTestStat: ${myround(pvcTestStat, 4)}")
 
             if (pvcTestStat > PVC_TEST_STAT_THRESH) { // looks like a PVC
                 pvcData.add(1.0)
@@ -128,7 +131,7 @@ class PeakDetection(var mActivity: MainActivity) {
             } else {                          // not a PVC
                 pvcData.add(0.0)
                 pvcData.lastTime = ecgData.time.get(lastPeakIndex)/1e9
-                Log.i(TAG, "not PVC")
+                Log.d(TAG, "not PVC")
             }
 
             // get RR distance based on timestamps, in seconds
