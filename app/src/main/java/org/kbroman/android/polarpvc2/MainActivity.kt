@@ -354,6 +354,11 @@ class MainActivity : AppCompatActivity() {
                     { error: Throwable ->
                         Log.e(TAG, "Ecg stream failed $error")
                         ecgDisposable = null
+
+                        // try to reconnect
+                        Thread.sleep(5000)  // pause five seconds and then try to reconnect
+                        Log.i(TAG, "Will try to reconnect")
+                        streamECG()
                     },
                     {
                         Log.d(TAG, "Ecg stream complete")
