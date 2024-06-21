@@ -25,7 +25,7 @@ class PVCplotter (private var mActivity: MainActivity?, private var Plot: XYPlot
 
     companion object {
         private const val TAG = "PolarPVC2app_plotpvc"
-        private const val N_TOTAL_POINTS: Int = 150*60*24*7   // maximum number of data points
+        private const val N_TOTAL_POINTS: Int = 150*60*25   // maximum number of data points
     }
 
     private var formatterPVC: XYSeriesFormatter<XYRegionFormatter>? = null
