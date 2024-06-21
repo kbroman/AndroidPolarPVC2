@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class WriteData(activity: MainActivity) {
-    private var timeFileOpened: Long = -1
+    var timeFileOpened: Long = -1
     private var mActivity = activity
     private var filePointer: ParcelFileDescriptor? = null
     private var fileWriter: PrintWriter? = null

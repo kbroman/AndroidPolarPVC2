@@ -207,6 +207,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "Stopping recording")
                 isRecording = false
                 wd.closeFile()
+                wd.timeFileOpened = -1 // to ensure file is opened when needed
             }
         }
 
