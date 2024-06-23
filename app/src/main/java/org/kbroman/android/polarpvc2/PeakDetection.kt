@@ -157,7 +157,7 @@ class PeakDetection(var mActivity: MainActivity) {
         }
 
         var result = which_max(ecg) + start
-        if(result != peak) Log.e(TAG, "${peak} -> ${result}   (${result - peak})")
+        if(result != peak) Log.d(TAG, "${peak} -> ${result}   (${result - peak})")
 
         return result
     }
