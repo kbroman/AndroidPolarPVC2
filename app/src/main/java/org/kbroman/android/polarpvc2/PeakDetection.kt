@@ -23,6 +23,7 @@ class PeakDetection(var mActivity: MainActivity) {
         private const val HR_200_INTERVAL: Int = 39  // = (60.0/200.0*130)
         private const val MAX_RR_SEC: Double = 60.0/35.0
         private const val MOVING_AVESD_WINDOW: Int = 500
+        private const val ADJUST_PEAK_WINDOW: Int = 4
         const val TIMESTAMP_OFFSET: Long = 946684800000000000
         // for time offset, see https://github.com/polarofficial/polar-ble-sdk/blob/master/documentation/TimeSystemExplained.md
     }
@@ -85,7 +86,7 @@ class PeakDetection(var mActivity: MainActivity) {
         // find maximum
         val max_index = which_max(smsqdiff)
         val this_smsqdiff: Double = smsqdiff[max_index]
-        thisPeakIndex = max_index + start
+        thisPeakIndex = adjustPeak(max_index + start)
 
         var peakFound = false
 
@@ -143,6 +144,22 @@ class PeakDetection(var mActivity: MainActivity) {
                 Log.d(TAG, "Ignoring RR = ${myround(rr, 2)} sec")
             }
         }
+    }
+
+
+    fun adjustPeak (peak: Int): Int {
+        var ecg = ArrayList<Double>()
+        var start: Int = peak - ADJUST_PEAK_WINDOW
+        var end: Int = min(ecgData.maxIndex()-1, peak + ADJUST_PEAK_WINDOW)
+
+        for(i in start..end) {
+            ecg.add(ecgData.volt.get(i))
+        }
+
+        var result = which_max(ecg) + start
+        if(result != peak) Log.e(TAG, "${peak} -> ${result}   (${result - peak})")
+
+        return result
     }
 
 
@@ -217,4 +234,5 @@ class PeakDetection(var mActivity: MainActivity) {
         lastPeakIndex = -1
         thisPeakIndex = -1
     }
+
 }
