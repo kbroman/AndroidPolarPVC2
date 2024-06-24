@@ -356,10 +356,9 @@ class MainActivity : AppCompatActivity() {
                         Log.e(TAG, "Ecg stream failed $error")
                         ecgDisposable = null
 
-                        // try to reconnect
-                        Thread.sleep(5000)  // pause five seconds and then try to reconnect
-                        Log.i(TAG, "Will try to reconnect")
-                        streamECG()
+                        // disconnected so turn switches off
+                        binding.connectSwitch.isChecked = false
+                        binding.recordSwitch.isChecked = false
                     },
                     {
                         Log.d(TAG, "Ecg stream complete")
