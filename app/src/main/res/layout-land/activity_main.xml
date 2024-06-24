@@ -23,7 +23,7 @@
             android:id="@+id/main"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.6">
+            android:layout_weight="0.8">
 
             <Switch
                 android:id="@+id/connect_switch"
@@ -103,7 +103,7 @@
             style="@style/FullScreenGraph.Minimalist"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:layout_weight="1.4"
+            android:layout_weight="1.2"
             app:graphBackgroundColor="@color/grayE"
             app:graphPaddingBottom="0dp"
             app:graphPaddingLeft="0dp"
